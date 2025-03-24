@@ -1,0 +1,34 @@
+﻿@model Electro_ECommerce.Models.Category
+
+@{
+    ViewData["Title"] = "Category Details";
+}
+
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-2">
+            Image
+        </dt>
+        <dd class="col-sm-10">
+            <img src="@Url.Content(Model.ImageUrl ?? "/img/default.jpg")" alt="Category Image" style="max-width: 200px;" />
+        </dd>
+    </dl>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.CategoryId" class="btn btn-warning">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
