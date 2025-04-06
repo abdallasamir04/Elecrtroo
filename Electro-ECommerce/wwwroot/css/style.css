@@ -1073,6 +1073,60 @@ textarea.input {
   opacity: 1;
   visibility: visible;
 }
+/*chaaaat*/
+
+/* جعل جميع البطاقات بنفس الارتفاع */
+.product-item {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* جعل البطاقة تمتلئ الحاوية بالكامل */
+.product {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+/* ضبط ارتفاع موحد لقسم الصورة */
+.product-img {
+    width: 100%;
+    height: 200px; /* يمكن تعديل هذا الرقم حسب الحاجة */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+    /* جعل الصورة تناسب الحاوية بدون تمدد */
+    .product-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* يجعل الصورة متناسقة */
+    }
+
+/* جعل المحتوى يتوزع بشكل متناسق داخل البطاقة */
+.product-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+}
+
+/* تأكد أن زر "إضافة إلى السلة" يبقى في الأسفل دائمًا */
+.add-to-cart {
+    margin-top: auto;
+}
+
+
+
+
+
+
+
 
 /*----------------------------*\
 	Widget product
