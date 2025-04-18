@@ -1,6 +1,8 @@
-﻿using Serenity.ComponentModel;
+using Serenity.ComponentModel;
 using System;
 using System.ComponentModel;
+using Serenity.ComponentModel;
+
 
 namespace Admin_p.Electro.Columns;
 
@@ -18,5 +20,9 @@ public class ProductsColumns
     public string CategoryName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public string ImagePath { get; set; }
+
+
+    // [ImageFormatter(FilenameFormat = "upload/Products/~", ScaleWidth = 100, ScaleHeight = 100)]
+    
+   // public string ImagePath { get; set; }
 }

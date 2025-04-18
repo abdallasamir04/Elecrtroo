@@ -1,4 +1,4 @@
-﻿using Serenity.ComponentModel;
+using Serenity.ComponentModel;
 using System;
 
 namespace Admin_p.Electro.Forms;
@@ -14,5 +14,8 @@ public class ProductsForm
     public int CategoryId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    [ImageUploadEditor(FilenameFormat = "upload/Products/~")]
+
     public string ImagePath { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿using Serenity.ComponentModel;
+using Serenity.ComponentModel;
 using Serenity.Data;
 using Serenity.Data.Mapping;
 using System;
@@ -41,6 +41,7 @@ public sealed class ProductsRow : Row<ProductsRow.RowFields>, IIdRow, INameRow
     public DateTime? UpdatedAt { get => fields.UpdatedAt[this]; set => fields.UpdatedAt[this] = value; }
 
     [DisplayName("Image Path"), Size(255)]
+    //[ImageUploadEditor(FilenameFormat = "upload/Products/~")]
     public string ImagePath { get => fields.ImagePath[this]; set => fields.ImagePath[this] = value; }
 
     [DisplayName("Category Name"), Origin(jCategory, nameof(electroDB.CategoriesRow.Name))]

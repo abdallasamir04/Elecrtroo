@@ -1,0 +1,51 @@
+﻿@model List<Electro_ECommerce.Models.ShoppingCart>
+
+@{
+    ViewData["Title"] = "My Cart";
+    decimal subtotal = Model.Sum(item => item.Product.Price * item.Quantity);
+}
+
+<div class="container my-5">
+    <div class="card p-4 shadow-sm" style="max-width: 900px; margin: 0 auto;">
+        <h2 class="text-center mb-4">My Cart</h2>
+        @if (!Model.Any())
+        {
+            <p class="text-center">Your cart is empty.</p>
+        }
+        else
+        {
+            <table class="table table-striped">
+                
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><img src="~/media/@item.Product.ImagePath" alt="@item.Product.Name" width="70" /></td>
+                            <td>@item.Product.Name</td>
+                            <td>
+                                <form asp-controller="ShoppingCart" asp-action="UpdateQuantity" method="post" class="d-flex">
+                                    <input type="hidden" name="cartId" value="@item.CartId" />
+                                    <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control w-50" />
+                                    <button type="submit" class="btn btn-sm btn-secondary ms-2">Update</button>
+                                </form>
+                            </td>
+                            <td>@item.Product.Price.ToString("C")</td>
+                            <td>@(item.Product.Price * item.Quantity).ToString("C")</td>
+                            <td>
+                                <form asp-controller="ShoppingCart" asp-action="RemoveFromCart" method="post">
+                                    <input type="hidden" name="cartId" value="@item.CartId" />
+                                    <button type="submit" class="btn btn-danger btn-sm">X</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <h4 class="text-end">Subtotal: @subtotal.ToString("C")</h4>
+            <div class="text-end mt-3">
+                <a href="/Checkout" class="btn btn-primary">Checkout</a>
+            </div>
+        }
+    </div>
+</div>

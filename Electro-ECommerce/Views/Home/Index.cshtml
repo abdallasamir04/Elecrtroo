@@ -99,7 +99,7 @@
 								$(".product-item").show();
 							} else {
 								$(".product-item").hide(); 
-								$('.product-item[data-category="' + category + '"]').show(); // إظهار المنتجات المطابقة
+								$('.product-item[data-category="' + category + '"]').show(); 
 							}
 						});
 					});
@@ -107,7 +107,7 @@
 
 
 
-				<!-- Products tab & slick -->
+				<!-- Products tab "/upload/Products/" + item.ImagePath -->
 
 				
 				
@@ -118,15 +118,16 @@
 							<div class="col-md-4 col-lg-3 product-item" data-category="@item.CategoryName">
 								<div class="product">
 									<div class="product-img">
-										<img src="@(string.IsNullOrEmpty(item.ImagePath) ? "/images/default-placeholder.pn" : item.ImagePath)"
-											 alt="@item.Name" width="1200px" max-height="150" />
-										<div class="product-label">
-											<span class="sale">-30%</span>
-											<span class="new">NEW</span>
-										</div>
+										
+										<img src="@(string.IsNullOrEmpty(item.ImagePath)
+                                             ? Url.Content("~/images/default-placeholder.png")
+                                             : Url.Content("~/media/" + item.ImagePath))"
+											 alt="@item.Name" width="1200px" style="max-height:150px;" />
 									</div>
+
+
 									<div class="product-body">
-										<p class="product-category">@item.CategoryName</p> <!-- عرض الفئة -->
+										<p class="product-category">@item.CategoryName</p> 
 										<h3 class="product-name"><a href="#">@item.Name</a></h3>
 										<h4 class="product-price">@item.Price <del class="product-old-price">$990.00</del></h4>
 										<div class="product-rating">
@@ -143,7 +144,12 @@
 										</div>
 									</div>
 									<div class="add-to-cart">
-										<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+
+										<form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+											<input type="hidden" name="ProductId" value="@item.ProductId" />
+											<button type="submit" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cartt</button>
+										</form>
+
 									</div>
 								</div>
 							</div>
@@ -151,63 +157,13 @@
 					</div>
 				</div>
 
-
-
-
-
-
-				
 				<!-- Products tab & slick -->
 			</div>
 			<!-- /row -->
 		</div>
 		<!-- /container -->
 	</div>
-	<!-- /SECTION -->
-	<!-- HOT DEAL SECTION -->
-	<div id="hot-deal" class="section">
-		<!-- container -->
-		<div class="container">
-			<!-- row -->
-			<div class="row">
-				<div class="col-md-12">
-					<div class="hot-deal">
-						<ul class="hot-deal-countdown">
-							<li>
-								<div>
-									<h3>02</h3>
-									<span>Days</span>
-								</div>
-							</li>
-							<li>
-								<div>
-									<h3>10</h3>
-									<span>Hours</span>
-								</div>
-							</li>
-							<li>
-								<div>
-									<h3>34</h3>
-									<span>Mins</span>
-								</div>
-							</li>
-							<li>
-								<div>
-									<h3>60</h3>
-									<span>Secs</span>
-								</div>
-							</li>
-						</ul>
-						<h2 class="text-uppercase">hot deal this week</h2>
-						<p>New Collection Up to 50% OFF</p>
-						<a class="primary-btn cta-btn" href="#">Shop now</a>
-					</div>
-				</div>
-			</div>
-			<!-- /row -->
-		</div>
-		<!-- /container -->
-	</div>
+
 	<!-- /HOT DEAL SECTION -->
 	<!-- SECTION -->
 	<div class="section">
@@ -458,7 +414,10 @@
 									<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
 								</div>
 							</div>
-							<!-- /product widget -->
+							<!-- /product widget --><div class="product-label">
+											<span class="sale">-30%</span>
+											<span class="new">NEW</span>
+										</div>
 							<!-- product widget -->
 							<div class="product-widget">
 								<div class="product-img">
@@ -708,7 +667,7 @@
 		<!-- /container -->
 	</div>
 	<!-- /NEWSLETTER -->
-	<!-- FOOTER -->
+	<!-- Cart -->
 
 	<!-- /FOOTER -->
 	<!-- jQuery Plugins -->

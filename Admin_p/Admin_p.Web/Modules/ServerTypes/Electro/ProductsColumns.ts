@@ -11,7 +11,6 @@ export interface ProductsColumns {
     CategoryName: Column<ProductsRow>;
     CreatedAt: Column<ProductsRow>;
     UpdatedAt: Column<ProductsRow>;
-    ImagePath: Column<ProductsRow>;
 }
 
 export class ProductsColumns extends ColumnsBase<ProductsRow> {

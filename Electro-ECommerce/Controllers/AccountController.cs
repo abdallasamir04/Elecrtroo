@@ -24,6 +24,30 @@ namespace Electro_ECommerce.Controllers
         {
             return View();
         }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Login(LoginViewModel model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View(model);
+        //    }
+
+        //    var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+        //    if (result.Succeeded)
+        //    {
+        //        return RedirectToAction("Index", "Home");
+        //    }
+
+        //    ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
+        //    return View(model);
+        //}
+       [HttpGet]
+       public IActionResult Register()
+        {
+           return View();
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -33,20 +57,19 @@ namespace Electro_ECommerce.Controllers
                 return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-
-            if (result.Succeeded)
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null)
             {
-                return RedirectToAction("Index", "Home");
+                var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
             ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
             return View(model);
-        }
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
         }
 
         [HttpPost]
@@ -64,6 +87,7 @@ namespace Electro_ECommerce.Controllers
                 PhoneNumber = model.PhoneNumber,
                 Role = "Customer"
             };
+
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -90,10 +114,15 @@ namespace Electro_ECommerce.Controllers
 
             return View(model);
 
+        }
 
-
-
-
+        //logout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Account");
         }
 
 

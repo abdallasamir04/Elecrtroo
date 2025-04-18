@@ -1,0 +1,55 @@
+﻿@model List<Electro_ECommerce.Models.ShoppingCart>
+
+@{
+    ViewData["Title"] = "My Cart";
+    decimal subtotal = Model.Sum(item => item.Product.Price * item.Quantity);
+}
+
+<!-- Offcanvas Cart -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="cartOffcanvasLabel">Cart</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        @if (!Model.Any())
+        {
+            <p>Your cart is empty.</p>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                <div class="d-flex align-items-center mb-3 border-bottom pb-2">
+                    <img src="~/media/@item.Product.ImagePath" alt="@item.Product.Name" width="60" class="me-2" />
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">@item.Product.Name</h6>
+                        <div class="d-flex align-items-center">
+                            <form asp-controller="ShoppingCart" asp-action="UpdateQuantity" method="post" class="d-flex me-2">
+                                <input type="hidden" name="cartId" value="@item.CartId" />
+                                <button type="submit" name="quantity" value="@(item.Quantity - 1)" class="btn btn-sm btn-outline-secondary">-</button>
+                                <span class="mx-2">@item.Quantity</span>
+                                <button type="submit" name="quantity" value="@(item.Quantity + 1)" class="btn btn-sm btn-outline-secondary">+</button>
+                            </form>
+                            <span class="text-muted">@item.Product.Price.ToString("C")</span>
+                        </div>
+                    </div>
+                    <form asp-controller="ShoppingCart" asp-action="RemoveFromCart" method="post" class="ms-2">
+                        <input type="hidden" name="cartId" value="@item.CartId" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">&times;</button>
+                    </form>
+                </div>
+            }
+
+            <div class="d-flex justify-content-between mt-3">
+                <strong>Subtotal:</strong>
+                <span>@subtotal.ToString("C")</span>
+            </div>
+
+            <div class="mt-3 d-flex gap-2">
+                <a href="/ShoppingCart" class="btn btn-outline-dark w-50">View Cart</a>
+                <a href="/Checkout" class="btn btn-danger w-50">Checkout</a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serenity.Extensions.DependencyInjection;
@@ -153,6 +154,14 @@ public partial class Startup
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
+        //App_Data
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(
+        Path.Combine(env.ContentRootPath, "App_Data", "upload")),
+            RequestPath = "/media",
+            ServeUnknownFileTypes = true
+        });
 
         app.UseRouting();
         app.UseAuthentication();
@@ -169,6 +178,9 @@ public partial class Startup
 
         app.ApplicationServices.GetRequiredService<IDataMigrations>().Initialize();
     }
+
+    
+
 
     public static Action<IApplicationBuilder> ConfigureTestPipeline { get; set; }
 

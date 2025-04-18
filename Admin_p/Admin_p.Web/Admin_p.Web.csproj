@@ -27,7 +27,13 @@
     <PackageReference Include="Serenity.Net.Web" Version="8.8.1" />
     <PackageReference Include="Serenity.Extensions" Version="8.8.1" />
   </ItemGroup>
-  <ItemGroup></ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wwwroot\img\895938a7bb7f4ce8bd5ff066ed3cd2bb.png" />
+    <None Include="wwwroot\img\895938a7bb7f4ce8bd5ff066ed3cd2bb.png.meta" />
+  </ItemGroup>
   <Target Name="NpmInstall" BeforeTargets="BeforeBuild" Condition="!Exists('node_modules\.bin\esbuild')">
     <Message Text="Installing NPM packages..." Importance="high" />
     <Exec Command="npm install" />

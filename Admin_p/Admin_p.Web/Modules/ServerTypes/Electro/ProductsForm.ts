@@ -1,4 +1,4 @@
-﻿import { StringEditor, DecimalEditor, IntegerEditor, ServiceLookupEditor, DateEditor, PrefixedContext, initFormType } from "@serenity-is/corelib";
+﻿import { StringEditor, DecimalEditor, IntegerEditor, ServiceLookupEditor, DateEditor, ImageUploadEditor, PrefixedContext, initFormType } from "@serenity-is/corelib";
 
 export interface ProductsForm {
     Name: StringEditor;
@@ -8,7 +8,7 @@ export interface ProductsForm {
     CategoryId: ServiceLookupEditor;
     CreatedAt: DateEditor;
     UpdatedAt: DateEditor;
-    ImagePath: StringEditor;
+    ImagePath: ImageUploadEditor;
 }
 
 export class ProductsForm extends PrefixedContext {
@@ -26,6 +26,7 @@ export class ProductsForm extends PrefixedContext {
             var w2 = IntegerEditor;
             var w3 = ServiceLookupEditor;
             var w4 = DateEditor;
+            var w5 = ImageUploadEditor;
 
             initFormType(ProductsForm, [
                 'Name', w0,
@@ -35,7 +36,7 @@ export class ProductsForm extends PrefixedContext {
                 'CategoryId', w3,
                 'CreatedAt', w4,
                 'UpdatedAt', w4,
-                'ImagePath', w0
+                'ImagePath', w5
             ]);
         }
     }
