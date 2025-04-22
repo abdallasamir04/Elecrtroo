@@ -48,6 +48,7 @@ namespace Electro_ECommerce.Controllers
         {
            return View();
         }
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -64,6 +65,13 @@ namespace Electro_ECommerce.Controllers
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
+
+                    
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        return RedirectToAction("Index", "Product");
+                    }
+
                     return RedirectToAction("Index", "Home");
                 }
             }
@@ -71,6 +79,7 @@ namespace Electro_ECommerce.Controllers
             ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
             return View(model);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -80,30 +89,41 @@ namespace Electro_ECommerce.Controllers
             {
                 return View(model);
             }
+
             var user = new User
             {
                 UserName = model.Name,
                 Email = model.Email,
                 PhoneNumber = model.PhoneNumber,
-                Role = "Customer"
+                Role = "Customer" 
             };
-
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
-            if (result.Succeeded) 
+            if (result.Succeeded)
             {
-                var roleExist = await _roleManager.RoleExistsAsync("User");
-
-                if (!roleExist)
+                
+                if (!await _roleManager.RoleExistsAsync("Admin"))
                 {
-                    var role = new IdentityRole("User");
-                    await _roleManager.CreateAsync(role);
+                    await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                }
+                if (!await _roleManager.RoleExistsAsync("User"))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole("User"));
                 }
 
-                await _userManager.AddToRoleAsync(user, "User");
-                await _signInManager.SignInAsync(user, isPersistent: false);
+              
+                if (user.Email.ToLower() == "eman@admin.com")
+                {
+                    await _userManager.AddToRoleAsync(user, "Admin");
+                    user.Role = "Admin"; 
+                }
+                else
+                {
+                    await _userManager.AddToRoleAsync(user, "User");
+                }
 
+                await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Login", "Account");
             }
 
@@ -113,8 +133,8 @@ namespace Electro_ECommerce.Controllers
             }
 
             return View(model);
-
         }
+
 
         //logout
         [HttpPost]

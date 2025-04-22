@@ -26,7 +26,7 @@ namespace Electro_ECommerce.Services
                 await AddRoleAsync(roleManager, "User");
                 // Add admin user
                 logger.LogInformation("Seeding admin user.");
-                var adminEmail = "admin@electro.com";
+                var adminEmail = "eman@admin.com";
                 if (await userManager.FindByEmailAsync(adminEmail) == null)
                 {
                     var adminUser = new User

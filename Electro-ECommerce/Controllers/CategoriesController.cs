@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Electro_ECommerce.Controllers
 {
+    
     public class CategoriesController : Controller
     {
         private readonly IRepository<Category> _categoryRepository;
