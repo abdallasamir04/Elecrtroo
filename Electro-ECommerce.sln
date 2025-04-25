@@ -5,8 +5,6 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Electro-ECommerce", "Electro-ECommerce\Electro-ECommerce.csproj", "{8B2DD6A9-F60C-410E-81AD-599F81532BDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin_p.Web", "Admin_p\Admin_p.Web\Admin_p.Web.csproj", "{4D38F163-17C9-4303-A107-6460A52D75A2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{8B2DD6A9-F60C-410E-81AD-599F81532BDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B2DD6A9-F60C-410E-81AD-599F81532BDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B2DD6A9-F60C-410E-81AD-599F81532BDE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D38F163-17C9-4303-A107-6460A52D75A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D38F163-17C9-4303-A107-6460A52D75A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D38F163-17C9-4303-A107-6460A52D75A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D38F163-17C9-4303-A107-6460A52D75A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

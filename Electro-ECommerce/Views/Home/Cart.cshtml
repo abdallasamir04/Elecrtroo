@@ -21,7 +21,8 @@
             foreach (var item in Model)
             {
                 <div class="d-flex align-items-center mb-3 border-bottom pb-2">
-                    <img src="~/media/@item.Product.ImagePath" alt="@item.Product.Name" width="60" class="me-2" />
+                    <img src="@Url.Content("~/media/" + item.Product.ImagePath)" alt="@item.Product.Name" width="60" class="me-2" />
+                    
                     <div class="flex-grow-1">
                         <h6 class="mb-1">@item.Product.Name</h6>
                         <div class="d-flex align-items-center">

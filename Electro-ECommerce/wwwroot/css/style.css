@@ -50,15 +50,104 @@ Table OF Contents
 /*=========================================================
 	01 -> GENERAL
 ===========================================================*/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #fff;
+}
+
+.poster-center-box {
+    width: 100%;
+    height: 420px;
+    background-color: #83b735;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    color: white;
+    overflow: hidden;
+}
+
+.text-left {
+    max-width: 40%;
+}
+
+    .text-left h1 {
+        font-size: 80px;
+        margin: 10px 0;
+        font-weight: 800;
+    }
+
+    .text-left .small {
+        font-size: 20px;
+        margin: 5px 0;
+    }
+
+.text-right {
+    text-align: left;
+    max-width: 35%;
+    color: white;
+}
+
+    .text-right h2 {
+        font-size: 32px;
+        margin: 10px 0 5px;
+    }
+
+    .text-right p {
+        font-size: 16px;
+        line-height: 1.4;
+    }
+
+.poster-product-image {
+    width: 350px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .poster-center-box {
+        flex-direction: column;
+        height: auto;
+        padding: 40px 20px;
+        text-align: center;
+    }
+
+    .poster-product-image {
+        width: 300px;
+        margin: 20px 0;
+    }
+
+    .text-left,
+    .text-right {
+        max-width: 100%;
+    }
+}
 /*----------------------------*\
 	Typography
 \*----------------------------*/
-
 body {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 400;
-  color: #333;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    color: #333;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -108,6 +197,15 @@ ul, ol {
   opacity: 0.9;
   color: #FFF;
 }
+
+
+
+
+
+
+
+
+
 
 /*----------------------------*\
 	Inputs
