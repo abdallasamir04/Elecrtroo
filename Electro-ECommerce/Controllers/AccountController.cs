@@ -70,6 +70,7 @@ namespace Electro_ECommerce.Controllers
                     if (await _userManager.IsInRoleAsync(user, "Admin"))
                     {
                         return RedirectToAction("Index", "Product");
+                       // return RedirectToAction("Index", "Product", new { area = "Admin" });
                     }
 
                     return RedirectToAction("Index", "Home");

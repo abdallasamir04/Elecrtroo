@@ -1,5 +1,4 @@
-﻿using Electro_ECommerce.Controllers;
-using Electro_ECommerce.Models;
+﻿using Electro_ECommerce.Models;
 using Electro_ECommerce.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,6 +8,7 @@ using Xunit;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using Electro_ECommerce.Controllers;
 
 namespace Electro_ECommerce.Tests
 {

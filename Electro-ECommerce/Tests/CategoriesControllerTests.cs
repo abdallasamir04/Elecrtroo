@@ -1,5 +1,4 @@
-﻿using Electro_ECommerce.Controllers;
-using Electro_ECommerce.Models;
+﻿using Electro_ECommerce.Models;
 using Electro_ECommerce.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Electro_ECommerce.Controllers;
 
 namespace Electro_ECommerce.Tests
 {

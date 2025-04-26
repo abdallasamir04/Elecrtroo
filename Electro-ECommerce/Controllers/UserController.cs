@@ -1,14 +1,16 @@
 ﻿using Electro_ECommerce.Data;
 using Electro_ECommerce.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Electro_ECommerce.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
-        private readonly UserManager<User> _userManager; // Use UserManager
+        private readonly UserManager<User> _userManager;
         private readonly TechXpressDbContext _context;
 
         public UserController(UserManager<User> userManager, TechXpressDbContext context)
@@ -23,18 +25,15 @@ namespace Electro_ECommerce.Controllers
             return View(users);
         }
 
-        public async Task<IActionResult> Details(string id) // id is a string now since it's IdentityUser.Id
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
             var user = await _userManager.FindByIdAsync(id);
+
             if (user == null)
-            {
                 return NotFound();
-            }
 
             return View(user);
         }
@@ -48,13 +47,23 @@ namespace Electro_ECommerce.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string userName, string email, string password, string? role, string? shippingAddress, string? phoneNumber)
         {
-            var user = new User { UserName = userName, Email = email, Role = role, ShippingAddress = shippingAddress, PhoneNumber = phoneNumber };
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+                return View();
+
+            var user = new User
+            {
+                UserName = userName,
+                Email = email,
+                Role = role,
+                ShippingAddress = shippingAddress,
+                PhoneNumber = phoneNumber,
+                CreatedAt = DateTime.Now
+            };
+
             var result = await _userManager.CreateAsync(user, password);
 
             if (result.Succeeded)
             {
-                // Optionally, add the user to a role here
-
                 return RedirectToAction(nameof(Index));
             }
 
@@ -63,38 +72,28 @@ namespace Electro_ECommerce.Controllers
                 ModelState.AddModelError(string.Empty, error.Description);
             }
 
-            return View(); // Return the Create view on failure to show errors
+            return View();
         }
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, string? role, string? shippingAddress, string? phoneNumber)
+        public async Task<IActionResult> Edit(string id, string userName, string email, string role)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return NotFound();
+
+            user.UserName = userName;
+            user.Email = email;
             user.Role = role;
-            user.ShippingAddress = shippingAddress;
-            user.PhoneNumber = phoneNumber;
+            user.UpdatedAt = DateTime.Now;
 
             var result = await _userManager.UpdateAsync(user);
+
             if (result.Succeeded)
             {
                 return RedirectToAction(nameof(Index));
@@ -105,35 +104,20 @@ namespace Electro_ECommerce.Controllers
                 ModelState.AddModelError(string.Empty, error.Description);
             }
 
-            return View(); // Return the Edit view on failure to show errors
+            return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
                 return NotFound();
-            }
 
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
-            {
                 return NotFound();
-            }
 
             var result = await _userManager.DeleteAsync(user);
 
@@ -147,7 +131,7 @@ namespace Electro_ECommerce.Controllers
                 ModelState.AddModelError(string.Empty, error.Description);
             }
 
-            return RedirectToAction(nameof(Index)); // Redirect even on error
+            return RedirectToAction(nameof(Index));
         }
     }
 }

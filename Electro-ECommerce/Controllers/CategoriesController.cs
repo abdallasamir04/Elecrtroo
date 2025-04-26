@@ -1,12 +1,15 @@
 ﻿using Electro_ECommerce.Models;
 using Electro_ECommerce.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace Electro_ECommerce.Controllers
 {
+
     
+    [Authorize(Roles = "Admin")]
     public class CategoriesController : Controller
     {
         private readonly IRepository<Category> _categoryRepository;

@@ -4,7 +4,7 @@ namespace Electro_ECommerce.Models;
 
 public class User : IdentityUser
 {
-    public string? FirstName { get; set; } //Custom property 
+    public string? FirstName { get; set; } 
     public DateTime? CreatedAt { get; set; }
 
     public string? Role { get; set; }

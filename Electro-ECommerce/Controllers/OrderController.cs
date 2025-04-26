@@ -1,114 +1,47 @@
-﻿using Electro_ECommerce.Models;
-using Electro_ECommerce.Repositories;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Electro_ECommerce.Data;
+using Electro_ECommerce.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
+using System.Security.Claims;
 
-namespace Electro_ECommerce.Controllers
+[Authorize] 
+public class OrderController : Controller
 {
-    public class OrdersController : Controller
+    private readonly TechXpressDbContext _context;
+
+    public OrderController(TechXpressDbContext context)
     {
-        private readonly IRepository<Order> _orderRepository;
-
-        public OrdersController(IRepository<Order> orderRepository)
-        {
-            _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
-        }
-
-        public ActionResult Index()
-        {
-            var orders = _orderRepository.GetAll();
-            return View(orders);
-        }
-
-        public ActionResult Details(int id)
-        {
-            var order = _orderRepository.GetById(id);
-            if (order == null)
-                return NotFound();
-
-            return View(order);
-        }
-
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Order order)
-        {
-            if (ModelState.IsValid)
-            {
-                _orderRepository.Add(order);
-                _orderRepository.SaveChanges();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(order);
-        }
-
-        public ActionResult Edit(int id)
-        {
-            var order = _orderRepository.GetById(id);
-            if (order == null)
-                return NotFound();
-
-            return View(order);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Order order)
-        {
-            if (id != order.OrderId) return BadRequest();
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    order.UpdatedAt = DateTime.Now;
-                    _orderRepository.Update(order);
-                    _orderRepository.SaveChanges();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrderExists(order.OrderId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(order);
-        }
-
-        public ActionResult Delete(int id)
-        {
-            var order = _orderRepository.GetById(id);
-            if (order == null)
-                return NotFound();
-
-            return View(order);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            var order = _orderRepository.GetById(id);
-            if (order == null) return NotFound();
-            _orderRepository.Delete(order);
-            _orderRepository.SaveChanges();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool OrderExists(int id)
-        {
-            return _orderRepository.Find(e => e.OrderId == id).Any();
-        }
+        _context = context;
     }
+
+    // GET: /Order/MyOrders
+    public async Task<IActionResult> Index()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var orders = await _context.Orders
+            .Where(o => o.UserId == userId)
+            .Include(o => o.OrderDetails)
+            .ThenInclude(od => od.Product) 
+            .ToListAsync();
+
+        return View(orders);
+    }
+
+
+    // GET: /Order/Details/5
+    public async Task<IActionResult> Details(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var order = await _context.Orders
+            .Include(o => o.OrderDetails)
+            .ThenInclude(od => od.Product) 
+            .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
+
+        if (order == null)
+            return NotFound();
+
+        return View(order);
+    }
+
 }

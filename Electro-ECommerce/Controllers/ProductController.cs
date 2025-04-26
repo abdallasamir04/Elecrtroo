@@ -1,5 +1,6 @@
 ﻿using Electro_ECommerce.Models;
 using Electro_ECommerce.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,8 @@ using System.Linq;
 
 namespace Electro_ECommerce.Controllers
 {
+    
+    [Authorize(Roles = "Admin")]
     public class ProductController : Controller
     {
         private readonly IRepository<Product> _productRepository;

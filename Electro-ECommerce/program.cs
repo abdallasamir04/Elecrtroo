@@ -53,6 +53,10 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+// Set Stripe API Key
+Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
+
 
 
 // Configure the HTTP request pipeline.
@@ -73,6 +77,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 //********
 app.UseSession();
+
+
+
 
 
 app.MapControllerRoute(
