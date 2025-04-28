@@ -27,7 +27,7 @@ else
             {
                 <tr>
                     <td>@order.OrderId</td>
-                    <td>@order.OrderDate?.ToString("yyyy-MM-dd")</td>
+                    <td>@order.OrderDate?.ToString("dd MMM yyyy")</td> <!-- Improved date format -->
                     <td>@order.TotalAmount.ToString("C")</td>
                     <td>@order.Status</td>
                     <td>

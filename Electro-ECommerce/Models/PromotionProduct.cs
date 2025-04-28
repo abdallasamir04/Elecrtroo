@@ -1,21 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-namespace Electro_ECommerce.Models;
-
-public partial class PromotionProduct
+namespace Electro_ECommerce.Models
 {
-    public int PromotionProductId { get; set; }
+    public class PromotionProduct
+    {
+        public int PromotionProductId { get; set; }
 
-    public int PromotionId { get; set; }
+        public int ProductId { get; set; }
 
-    public int ProductId { get; set; }
+        public int PromotionId { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+        // Add these missing properties
+        public DateTime CreatedAt { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
-    public virtual Product Product { get; set; } = null!;
-
-    public virtual Promotion Promotion { get; set; } = null!;
+        // Navigation properties
+        public virtual Product? Product { get; set; }
+        public virtual Promotion? Promotion { get; set; }
+    }
 }

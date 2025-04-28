@@ -146,6 +146,7 @@
 		}
 	}
 
+
 	// Price Slider
 	var priceSlider = document.getElementById('price-slider');
 	if (priceSlider) {
@@ -164,5 +165,17 @@
 			handle ? priceInputMax.value = value : priceInputMin.value = value
 		});
 	}
+	// Add this to the existing document.addEventListener("DOMContentLoaded", () => { ... }) function
+
+	// Product filters animation
+	    const initProductFilters = () => {
+		const priceRangeElement = document.getElementById('price-range');
+		const filterCheckboxes = document.querySelectorAll('.filter-checkbox');
+		const filterStatus = document.querySelectorAll('.filter-status');
+		const applyPriceFilterBtn = document.getElementById('apply-price-filter');
+		const filteredProductsContainer = document.getElementById('filtered-products');
+
+
+
 
 })(jQuery);

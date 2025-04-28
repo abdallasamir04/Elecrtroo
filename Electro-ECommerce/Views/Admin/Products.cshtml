@@ -1,0 +1,136 @@
+﻿@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Product Management";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="admin-card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Product Management</h2>
+                    <a asp-controller="Admin" asp-action="CreateProduct" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add New Product
+                    </a>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var product in Model)
+                                {
+                                    <tr>
+                                        <td>@product.ProductId</td>
+                                        <td>
+                                            <img src="@(string.IsNullOrEmpty(product.ImagePath) ? "/images/default-placeholder.png" : product.ImagePath)"
+                                                 alt="@product.Name" width="50" height="50" style="object-fit: cover;" />
+                                        </td>
+                                        <td>@product.Name</td>
+                                        <td>@(product.Category?.Name ?? "Uncategorized")</td>
+                                        <td>$@product.Price.ToString("F2")</td>
+                                        <td>
+                                            @if (product.StockQuantity > 10)
+                                            {
+                                                <span class="badge bg-success">@product.StockQuantity</span>
+                                            }
+                                            else if (product.StockQuantity > 0)
+                                            {
+                                                <span class="badge bg-warning">@product.StockQuantity</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Out of Stock</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a asp-controller="Admin" asp-action="EditProduct" asp-route-id="@product.ProductId" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        onclick="confirmDeleteProduct(@product.ProductId, '@product.Name')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center">No products found</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteProductModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete product <span id="productName" class="fw-bold"></span>?
+                This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteProductForm" asp-controller="Admin" asp-action="DeleteProduct" method="post">
+                    <input type="hidden" id="productId" name="id" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDeleteProduct(id, name) {
+            document.getElementById('productId').value = id;
+            document.getElementById('productName').textContent = name || 'this product';
+
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
+            deleteModal.show();
+        }
+    </script>
+}

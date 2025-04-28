@@ -1,0 +1,72 @@
+﻿<div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickViewModalLabel">Product Quick View</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="/placeholder.svg" alt="Product Image" id="quickViewImage" class="img-fluid">
+                    </div>
+                    <div class="col-md-6">
+                        <h3 id="quickViewName"></h3>
+                        <div class="product-rating mb-2">
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star-half-o"></i>
+                        </div>
+                        <h4 class="product-price mb-3" id="quickViewPrice"></h4>
+                        <p id="quickViewDescription"></p>
+
+                        <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post" class="mt-3">
+                            <input type="hidden" name="ProductId" id="quickViewProductId">
+                            <div class="d-flex align-items-center mb-3">
+                                <label class="me-3">Quantity:</label>
+                                <div class="input-group" style="width: 120px;">
+                                    <button type="button" class="btn btn-outline-secondary quick-qty-down">-</button>
+                                    <input type="number" name="Quantity" value="1" min="1" class="form-control text-center">
+                                    <button type="button" class="btn btn-outline-secondary quick-qty-up">+</button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openQuickView(productId, name, price, description, image) {
+        document.getElementById('quickViewProductId').value = productId;
+        document.getElementById('quickViewName').textContent = name;
+        document.getElementById('quickViewPrice').textContent = '$' + price;
+        document.getElementById('quickViewDescription').textContent = description;
+        document.getElementById('quickViewImage').src = image || '/images/default-placeholder.png';
+
+        var quickViewModal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+        quickViewModal.show();
+    }
+
+    // Quantity buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('.quick-qty-up').addEventListener('click', function() {
+            var input = this.parentElement.querySelector('input');
+            var value = parseInt(input.value);
+            input.value = value + 1;
+        });
+
+        document.querySelector('.quick-qty-down').addEventListener('click', function() {
+            var input = this.parentElement.querySelector('input');
+            var value = parseInt(input.value);
+            if (value > 1) {
+                input.value = value - 1;
+            }
+        });
+    });
+</script>

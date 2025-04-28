@@ -1,0 +1,101 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/ShoppingCart">Shopping Cart</a></li>
+                        <li class="breadcrumb-item"><a href="/Checkout">Checkout</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Order Confirmation</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <div class="col-12 text-center order-success">
+                <i class="fas fa-check-circle text-success"></i>
+                <h2>Thank You for Your Order!</h2>
+                <p>Your order has been placed successfully. We'll process it as soon as possible.</p>
+                <div class="alert alert-info">
+                    <strong>Order Number:</strong> #@Model.OrderId
+                </div>
+                <p>A confirmation email has been sent to your email address.</p>
+                <a href="/" class="btn btn-primary mt-3">Continue Shopping</a>
+            </div>
+
+            <div class="col-12 mt-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Order Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Order Information</h6>
+                                <p><strong>Order Number:</strong> #@Model.OrderId</p>
+                                <p><strong>Order Date:</strong> @Model.OrderDate?.ToString("MMMM dd, yyyy")</p>
+                                <p><strong>Order Status:</strong> @Model.Status</p>
+                                <p><strong>Total Amount:</strong> $@Model.TotalAmount.ToString("F2")</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Shipping Information</h6>
+                                <p><strong>Name:</strong> @Model.User.FirstName @Model.User.UserName</p>
+                                <p><strong>Address:</strong> @Model.User.ShippingAddress</p>
+                                <p><strong>Email:</strong> @Model.User.Email</p>
+                                <p><strong>Phone:</strong> @Model.User.PhoneNumber</p>
+                            </div>
+                        </div>
+
+                        <h6 class="mt-4">Order Items</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderDetails)
+                                    {
+                                        <tr>
+                                            <td>@item.Product.Name</td>
+                                            <td>$@item.UnitPrice.ToString("F2")</td>
+                                            <td>@item.Quantity</td>
+                                            <td>$@item.Subtotal.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                        <td>$@Model.OrderDetails.Sum(od => od.Subtotal).ToString("F2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Tax:</strong></td>
+                                        <td>$@(Model.TotalAmount * 0.1m).ToString("F2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                                        <td>$10.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                        <td><strong>$@Model.TotalAmount.ToString("F2")</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+﻿@model Electro_ECommerce.ViewModels.LoginWith2faViewModel
+@{
+    ViewData["Title"] = "Two-factor authentication";
+    Layout = "_AccountLayout";
+}
+
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Electro
+                    </h3>
+                    <p class="mt-2 mb-0">Two-factor authentication</p>
+                </div>
+                <div class="card-body p-4">
+                    <p>Your login is protected with an authenticator app. Enter your authenticator code below.</p>
+                    <form asp-action="LoginWith2fa" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+                        <input asp-for="RememberMe" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="TwoFactorCode" class="form-control" autocomplete="off" />
+                            <label asp-for="TwoFactorCode">Authenticator code</label>
+                            <span asp-validation-for="TwoFactorCode" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="RememberMachine" class="form-check-input" />
+                            <label asp-for="RememberMachine" class="form-check-label">
+                                Remember this machine
+                            </label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Log in</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div class="small">
+                        <p>
+                            Don't have access to your authenticator device? You can
+                            <a asp-action="LoginWithRecoveryCode" asp-route-returnUrl="@ViewData["ReturnUrl"]">log in with a recovery code</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

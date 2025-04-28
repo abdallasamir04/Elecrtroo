@@ -1,33 +1,27 @@
 ﻿@model Electro_ECommerce.Models.Order
 
-@{
-    ViewData["Title"] = $"Order Details - #{Model.OrderId}";
-}
+<h2>Order Details - @Model.OrderId</h2>
 
-<h2>Order #@Model.OrderId</h2>
-<p><strong>Date:</strong> @Model.OrderDate?.ToString("yyyy-MM-dd")</p>
-<p><strong>Status:</strong> @Model.Status</p>
-<p><strong>Total:</strong> @Model.TotalAmount.ToString("C")</p>
-
-<h4 class="mt-4">Products</h4>
-<table class="table table-striped">
+<table class="table">
     <thead>
         <tr>
-            <th>Product</th>
+            <th>Product Name</th>
             <th>Quantity</th>
-            <th>Price</th>
+            <th>Unit Price</th>
             <th>Subtotal</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.OrderDetails)
+        @foreach (var detail in Model.OrderDetails)
         {
             <tr>
-                <td>@item.Product.Name</td>
-                <td>@item.Quantity</td>
-                <td>@item.UnitPrice.ToString("C")</td>
-                <td>@(item.Quantity * item.UnitPrice).ToString("C")</td>
+                <td>@detail.Product.Name</td>
+                <td>@detail.Quantity</td>
+                <td>@detail.UnitPrice.ToString("C")</td>
+                <td>@detail.Subtotal.ToString("C")</td>
             </tr>
         }
     </tbody>
 </table>
+
+<p><strong>Total Amount:</strong> @Model.TotalAmount.ToString("C")</p>

@@ -1,59 +1,286 @@
-﻿@model Electro_ECommerce.Models.Product
-
+﻿@model ProductDetailsViewModel
 @{
-    ViewData["Title"] = "Product Details";
+    ViewData["Title"] = Model.Name;
 }
-@{
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
-}
-<div class="container">
-    <h2>@ViewData["Title"]</h2>
 
-    <div>
-        <h4>Product</h4>
-        <hr />
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.DisplayNameFor(model => model.Name)
-            </dt>
-            <dd>
-                @Html.DisplayFor(model => model.Name)
-            </dd>
-            <dt>
-                @Html.DisplayNameFor(model => model.Description)
-            </dt>
-            <dd>
-                @Html.DisplayFor(model => model.Description)
-            </dd>
-            <dt>
-                @Html.DisplayNameFor(model => model.Price)
-            </dt>
-            <dd>
-                @Html.DisplayFor(model => model.Price)
-            </dd>
-            <dt>
-                @Html.DisplayNameFor(model => model.StockQuantity)
-            </dt>
-            <dd>
-                @Html.DisplayFor(model => model.StockQuantity)
-            </dd>
-            <dt>
-                @Html.DisplayNameFor(model => model.Category)
-            </dt>
-            <dd>
-                @if (Model.Category != null)
-                {
-                    @Html.DisplayFor(model => model.Category.Name)
-                }
-                else
-                {
-                    <span>N/A</span>
-                }
-            </dd>
-        </dl>
-    </div>
-    <div>
-        <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-warning"><i class="fa fa-pencil"></i> Edit</a> |
-        <a asp-action="Index" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Back to List</a>
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <!-- Breadcrumb -->
+            <div class="col-12 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">@Model.CategoryName</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Product main img -->
+            <div class="col-md-5">
+                <div class="product-details-img">
+                    <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/default-placeholder.png" : Model.ImagePath)"
+                         alt="@Model.Name" class="img-fluid">
+                </div>
+            </div>
+
+            <!-- Product details -->
+            <div class="col-md-7">
+                <div class="product-details">
+                    <h2 class="product-name mb-3">@Model.Name</h2>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="product-rating me-3">
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star-o"></i>
+                        </div>
+                        <a href="#reviews" class="review-link">10 Review(s)</a>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="product-price">
+                            $@Model.Price.ToString("F2")
+                            @if (Model.OriginalPrice.HasValue)
+                            {
+                                <del class="product-old-price">$@Model.OriginalPrice.Value.ToString("F2")</del>
+                            }
+                        </h3>
+                        <span class="product-available">@(Model.IsInStock ? "In Stock" : "Out of Stock")</span>
+                    </div>
+
+                    <p class="mb-4">@Model.Description</p>
+
+                    @if (Model.AvailableOptions != null && Model.AvailableOptions.Any())
+                    {
+                        <div class="product-options mb-4">
+                            @foreach (var option in Model.AvailableOptions)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">@option.Key</label>
+                                    <select class="form-select">
+                                        @foreach (var value in option.Value)
+                                        {
+                                            <option value="@value">@value</option>
+                                        }
+                                    </select>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                        <input type="hidden" name="ProductId" value="@Model.ProductId" />
+
+                        <div class="d-flex align-items-center mb-4">
+                            <label class="me-3">Quantity:</label>
+                            <div class="input-group" style="width: 120px;">
+                                <button type="button" class="btn btn-outline-secondary qty-down">-</button>
+                                <input type="number" name="Quantity" value="1" min="1" class="form-control text-center">
+                                <button type="button" class="btn btn-outline-secondary qty-up">+</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fa fa-shopping-cart me-2"></i> Add to Cart
+                            </button>
+
+                            <button type="button" class="btn btn-outline-secondary btn-lg ms-2" onclick="addToWishlist(@Model.ProductId)">
+                                <i class="fa fa-heart-o me-2"></i> Add to Wishlist
+                            </button>
+
+                            <button type="button" class="btn btn-outline-secondary btn-lg ms-2" onclick="addToCompare(@Model.ProductId)">
+                                <i class="fa fa-exchange me-2"></i> Add to Compare
+                            </button>
+                        </div>
+                    </form>
+
+                    @if (Model.Specifications != null && Model.Specifications.Any())
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Specifications</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-striped mb-0">
+                                    <tbody>
+                                        @foreach (var spec in Model.Specifications)
+                                        {
+                                            <tr>
+                                                <th>@spec.Key</th>
+                                                <td>@spec.Value</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">Share:</span>
+                        <div class="social-links">
+                            <a href="#" class="me-2"><i class="fa fa-facebook"></i></a>
+                            <a href="#" class="me-2"><i class="fa fa-twitter"></i></a>
+                            <a href="#" class="me-2"><i class="fa fa-instagram"></i></a>
+                            <a href="#"><i class="fa fa-pinterest"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product description tabs -->
+            <div class="col-12 mt-5">
+                <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Reviews (3)</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-4 border border-top-0 rounded-bottom" id="productTabsContent">
+                    <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                        <p>@Model.Description</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl eget ultricies ultricies, nunc nisl ultricies nunc, eget ultricies nisl nisl eget ultricies ultricies, nunc nisl ultricies nunc, eget ultricies nisl.</p>
+                    </div>
+                    <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <h5>3 Reviews for @Model.Name</h5>
+                                </div>
+                                <div class="review mb-4 pb-4 border-bottom">
+                                    <div class="d-flex mb-3">
+                                        <div class="flex-shrink-0">
+                                            <img src="/images/default-placeholder.png" alt="User" width="50" height="50" class="rounded-circle">
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="mb-1">John Doe</h6>
+                                            <div class="d-flex align-items-center">
+                                                <div class="product-rating me-2">
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                </div>
+                                                <small class="text-muted">June 10, 2023</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p>Great product! Exactly as described and arrived quickly.</p>
+                                </div>
+                                <!-- More reviews would go here -->
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="mb-4">Write a Review</h5>
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="reviewName" class="form-label">Your Name</label>
+                                        <input type="text" class="form-control" id="reviewName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reviewEmail" class="form-label">Your Email</label>
+                                        <input type="email" class="form-control" id="reviewEmail" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Your Rating</label>
+                                        <div class="rating-input">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="rating" id="rating5" value="5" checked>
+                                                <label class="form-check-label" for="rating5">5 Stars</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="rating" id="rating4" value="4">
+                                                <label class="form-check-label" for="rating4">4 Stars</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="rating" id="rating3" value="3">
+                                                <label class="form-check-label" for="rating3">3 Stars</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="rating" id="rating2" value="2">
+                                                <label class="form-check-label" for="rating2">2 Stars</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="rating" id="rating1" value="1">
+                                                <label class="form-check-label" for="rating1">1 Star</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reviewText" class="form-label">Your Review</label>
+                                        <textarea class="form-control" id="reviewText" rows="4" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Products -->
+            <div class="col-12 mt-5">
+                <h3 class="mb-4">Related Products</h3>
+                <div class="row">
+                    @if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
+                    {
+                        foreach (var product in Model.RelatedProducts)
+                        {
+                            <div class="col-md-3 col-xs-6">
+                                <div class="product">
+                                    <div class="product-img">
+                                        <img src="@(string.IsNullOrEmpty(product.ImagePath) ? "/images/default-placeholder.png" : product.ImagePath)" alt="@product.Name">
+                                    </div>
+                                    <div class="product-body">
+                                        <p class="product-category">@product.CategoryName</p>
+                                        <h3 class="product-name"><a href="/Home/Details/@product.ProductId">@product.Name</a></h3>
+                                        <h4 class="product-price">$@product.Price.ToString("F2")</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    else
+                    {
+                        <div class="col-12">
+                            <p>No related products found.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Quantity buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const qtyUp = document.querySelector('.qty-up');
+            const qtyDown = document.querySelector('.qty-down');
+            const qtyInput = document.querySelector('input[name="Quantity"]');
+
+            if (qtyUp) {
+                qtyUp.addEventListener('click', function() {
+                    qtyInput.value = parseInt(qtyInput.value) + 1;
+                });
+            }
+
+            if (qtyDown) {
+                qtyDown.addEventListener('click', function() {
+                    if (parseInt(qtyInput.value) > 1) {
+                        qtyInput.value = parseInt(qtyInput.value) - 1;
+                    }
+                });
+            }
+        });
+    </script>
+}

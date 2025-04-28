@@ -204,17 +204,23 @@ namespace Electro_ECommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
 
-                    b.Property<int?>("CategoryId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int")
                         .HasColumnName("CategoryID");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DiscountPercentage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(5, 2)")
+                        .HasDefaultValue(0m);
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
@@ -230,7 +236,7 @@ namespace Electro_ECommerce.Migrations
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
@@ -252,7 +258,7 @@ namespace Electro_ECommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PromotionId"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
@@ -260,13 +266,13 @@ namespace Electro_ECommerce.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("DiscountPercentage")
+                    b.Property<decimal>("DiscountPercentage")
                         .HasColumnType("decimal(5, 2)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
@@ -279,7 +285,7 @@ namespace Electro_ECommerce.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
@@ -299,7 +305,7 @@ namespace Electro_ECommerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PromotionProductId"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
@@ -312,7 +318,7 @@ namespace Electro_ECommerce.Migrations
                         .HasColumnType("int")
                         .HasColumnName("PromotionID");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
@@ -325,6 +331,43 @@ namespace Electro_ECommerce.Migrations
                     b.HasIndex("PromotionId");
 
                     b.ToTable("PromotionProducts");
+                });
+
+            modelBuilder.Entity("Electro_ECommerce.Models.Review", b =>
+                {
+                    b.Property<int>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewId"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReviewId1")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ReviewId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ReviewId1");
+
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Electro_ECommerce.Models.ShoppingCart", b =>
@@ -398,6 +441,9 @@ namespace Electro_ECommerce.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -414,6 +460,9 @@ namespace Electro_ECommerce.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
@@ -445,6 +494,33 @@ namespace Electro_ECommerce.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Electro_ECommerce.Models.Wishlist", b =>
+                {
+                    b.Property<int>("WishlistId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WishlistId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("WishlistId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Wishlists");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -526,10 +602,10 @@ namespace Electro_ECommerce.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.Property<string>("ProviderKey")
+                    b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("LoginProvider")
+                    b.Property<string>("ProviderKey")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderDisplayName")
@@ -539,7 +615,7 @@ namespace Electro_ECommerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("ProviderKey", "LoginProvider");
+                    b.HasKey("LoginProvider", "ProviderKey");
 
                     b.HasIndex("UserId");
 
@@ -586,7 +662,7 @@ namespace Electro_ECommerce.Migrations
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .IsRequired()
-                        .HasConstraintName("FK__Orders__UserID__4BAC3F29");
+                        .HasConstraintName("FK_Orders_Users_UserId");
 
                     b.Navigation("User");
                 });
@@ -626,6 +702,8 @@ namespace Electro_ECommerce.Migrations
                     b.HasOne("Electro_ECommerce.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK__Products__Catego__4316F928");
 
                     b.Navigation("Category");
@@ -650,6 +728,21 @@ namespace Electro_ECommerce.Migrations
                     b.Navigation("Promotion");
                 });
 
+            modelBuilder.Entity("Electro_ECommerce.Models.Review", b =>
+                {
+                    b.HasOne("Electro_ECommerce.Models.Product", "Product")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Electro_ECommerce.Models.Review", null)
+                        .WithMany("Reviews")
+                        .HasForeignKey("ReviewId1");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Electro_ECommerce.Models.ShoppingCart", b =>
                 {
                     b.HasOne("Electro_ECommerce.Models.Product", "Product")
@@ -662,6 +755,25 @@ namespace Electro_ECommerce.Migrations
                         .WithMany("ShoppingCarts")
                         .HasForeignKey("UserId")
                         .HasConstraintName("FK__ShoppingC__UserI__5BE2A6F2");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Electro_ECommerce.Models.Wishlist", b =>
+                {
+                    b.HasOne("Electro_ECommerce.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Electro_ECommerce.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Product");
 
@@ -737,12 +849,19 @@ namespace Electro_ECommerce.Migrations
 
                     b.Navigation("PromotionProducts");
 
+                    b.Navigation("Reviews");
+
                     b.Navigation("ShoppingCarts");
                 });
 
             modelBuilder.Entity("Electro_ECommerce.Models.Promotion", b =>
                 {
                     b.Navigation("PromotionProducts");
+                });
+
+            modelBuilder.Entity("Electro_ECommerce.Models.Review", b =>
+                {
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Electro_ECommerce.Models.User", b =>

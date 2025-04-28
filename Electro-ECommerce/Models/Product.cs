@@ -1,34 +1,45 @@
-﻿using System;
+﻿using Electro_ECommerce.Models;
+
+using Stripe;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-namespace Electro_ECommerce.Models;
-
-public partial class Product
+namespace Electro_ECommerce.Models
 {
-    public int ProductId { get; set; }
+    public class Product
+    {
+        public int ProductId { get; set; }
 
-    public string Name { get; set; } = null!;
+        [Required]
+        public string Name { get; set; } = string.Empty;
 
-    public string? Description { get; set; }
+        [Required]
+        public string Description { get; set; } = string.Empty;
 
-    public decimal Price { get; set; }
+        public decimal Price { get; set; }
 
-    public int StockQuantity { get; set; }
+        public int StockQuantity { get; set; }
 
-    public int? CategoryId { get; set; }
+        public int CategoryId { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+        public string? ImagePath { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
-   
-    //add imeg
-    
-	public string? ImagePath { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-	public virtual Category? Category { get; set; }
-    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public DateTime UpdatedAt { get; set; }
 
-    public virtual ICollection<PromotionProduct> PromotionProducts { get; set; } = new List<PromotionProduct>();
+        // Add this missing property
+        public decimal DiscountPercentage { get; set; }
 
-    public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new List<ShoppingCart>();
+        // Navigation properties
+        public Category? Category { get; set; }
+
+        public virtual ICollection<Review>? Reviews { get; set; }  // <-- Add this
+
+        // Collection navigation properties
+        public virtual ICollection<ShoppingCart>? ShoppingCarts { get; set; }
+        public virtual ICollection<OrderDetail>? OrderDetails { get; set; }
+        public virtual ICollection<PromotionProduct>? PromotionProducts { get; set; }
+    }
 }

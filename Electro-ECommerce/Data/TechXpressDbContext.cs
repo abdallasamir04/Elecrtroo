@@ -18,38 +18,34 @@ public partial class TechXpressDbContext : IdentityDbContext<User>
     {
     }
 
-    public virtual DbSet<Category> Categories { get; set; }
+    public virtual DbSet<Category> Categories { get; set; } = null!;
 
-    public virtual DbSet<Order> Orders { get; set; }
+    public virtual DbSet<Order> Orders { get; set; } = null!;
 
-    public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+    public virtual DbSet<OrderDetail> OrderDetails { get; set; } = null!;
 
-    public virtual DbSet<Payment> Payments { get; set; }
+    public virtual DbSet<Payment> Payments { get; set; } = null!;
 
-    public virtual DbSet<Product> Products { get; set; }
+    public virtual DbSet<Product> Products { get; set; } = null!;
 
-    public virtual DbSet<Promotion> Promotions { get; set; }
+    public virtual DbSet<Promotion> Promotions { get; set; } = null!;
 
-    public virtual DbSet<PromotionProduct> PromotionProducts { get; set; }
+    public virtual DbSet<PromotionProduct> PromotionProducts { get; set; } = null!;
 
-    public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
-	
+    public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; } = null!;
+    public DbSet<Wishlist> Wishlists { get; set; }
 
+    public virtual DbSet<Review> Reviews { get; set; } = null!;
 
-	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=.;Database=TechXpressDB;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
         base.OnModelCreating(modelBuilder);  // This ensures that the Identity configuration is included.
 
         // Define primary key for IdentityUserLogin if not set
-        modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(login => new { login.ProviderKey, login.LoginProvider });
+        modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(login => new { login.LoginProvider, login.ProviderKey });
         modelBuilder.Entity<IdentityUserRole<string>>().HasKey(role => new { role.UserId, role.RoleId });
         modelBuilder.Entity<IdentityUserToken<string>>().HasKey(token => new { token.UserId, token.LoginProvider, token.Name });
-
 
         modelBuilder.Entity<Category>(entity =>
         {
@@ -72,18 +68,15 @@ public partial class TechXpressDbContext : IdentityDbContext<User>
                 .IsRequired()
                 .HasMaxLength(450);  // Identity column length for string Id is 450
 
+            // Fixed duplicate relationship - removed one of them
             entity.HasOne(d => d.User)
                 .WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_Users_UserId");
-            entity.HasOne(d => d.User)
-                .WithMany(p => p.Orders)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Orders__UserID__4BAC3F29");
+
             entity.Property(e => e.TotalAmount)
-        .HasColumnType("decimal(18, 2)"); // Specifies the precision and scale for the decimal
+                .HasColumnType("decimal(18, 2)"); // Specifies the precision and scale for the decimal
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>
@@ -155,6 +148,10 @@ public partial class TechXpressDbContext : IdentityDbContext<User>
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            // Added DiscountPercentage property configuration
+            entity.Property(e => e.DiscountPercentage)
+                .HasColumnType("decimal(5, 2)")
+                .HasDefaultValue(0);
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
