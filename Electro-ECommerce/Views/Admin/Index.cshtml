@@ -1,0 +1,233 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="admin-card stat-card">
+                <div class="stat-icon bg-primary-soft">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>@(ViewBag.OrdersCount ?? 0)</h3>
+                    <p>Total Orders</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="admin-card stat-card">
+                <div class="stat-icon bg-success-soft">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>$@(ViewBag.Revenue ?? 0)</h3>
+                    <p>Total Revenue</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="admin-card stat-card">
+                <div class="stat-icon bg-info-soft">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>@(ViewBag.UsersCount ?? 0)</h3>
+                    <p>Total Users</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="admin-card stat-card">
+                <div class="stat-icon bg-warning-soft">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>@(ViewBag.ProductsCount ?? 0)</h3>
+                    <p>Total Products</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="admin-card mb-4">
+                <div class="card-header bg-light py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold">Recent Orders</h6>
+                    <a href="/Order" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.RecentOrders != null)
+                                {
+                                    foreach (var order in ViewBag.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td>#@order.OrderId</td>
+                                            <td>@(order.User?.UserName ?? "Unknown")</td>
+                                            <td>@(order.OrderDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
+                                            <td>$@order.TotalAmount.ToString("F2")</td>
+                                            <td>
+                                                @if (order.Status == "Completed")
+                                                {
+                                                    <span class="badge bg-success">@order.Status</span>
+                                                }
+                                                else if (order.Status == "Processing")
+                                                {
+                                                    <span class="badge bg-primary">@order.Status</span>
+                                                }
+                                                else if (order.Status == "Cancelled")
+                                                {
+                                                    <span class="badge bg-danger">@order.Status</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">@(order.Status ?? "Pending")</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center">No recent orders</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Selling Products -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="admin-card mb-4">
+                <div class="card-header bg-light py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold">Top Selling Products</h6>
+                    <a href="/Product" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.TopProducts != null)
+                    {
+                        foreach (var product in ViewBag.TopProducts)
+                        {
+                            <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                <img src="@(string.IsNullOrEmpty(product.ImagePath) ? "/images/default-placeholder.png" : product.ImagePath)"
+                                     alt="@product.Name" width="50" height="50" class="me-3" style="object-fit: cover;" />
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">@product.Name</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">@(product.Category?.Name ?? "Uncategorized")</small>
+                                        <span class="text-primary fw-bold">$@product.Price.ToString("F2")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-center">No products data available</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Chart -->
+    <div class="row">
+        <div class="col-12">
+            <div class="admin-card mb-4">
+                <div class="card-header bg-light py-3">
+                    <h6 class="m-0 font-weight-bold">Sales Overview</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sample data - replace with actual data from your backend
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const salesData = [5000, 7500, 6500, 8000, 9500, 11000, 10500, 12000, 12500, 13000, 14000, 15000];
+            const ordersData = [50, 65, 60, 75, 85, 95, 90, 105, 110, 115, 120, 130];
+
+            // Sales Chart
+            const ctx = document.getElementById('salesChart');
+            if (ctx) {
+                new Chart(ctx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Sales ($)',
+                                data: salesData,
+                                borderColor: '#ff3d00',
+                                backgroundColor: 'rgba(255, 61, 0, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            },
+                            {
+                                label: 'Orders',
+                                data: ordersData,
+                                borderColor: '#3498db',
+                                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

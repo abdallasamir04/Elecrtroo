@@ -1,0 +1,160 @@
+﻿@model List<Wishlist>
+@{
+    ViewData["Title"] = "My Wishlist";
+}
+
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Wishlist</li>
+                    </ol>
+                </nav>
+                <h1 class="h2 mb-4">My Wishlist</h1>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="col-12">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            }
+
+            @if (TempData["InfoMessage"] != null)
+            {
+                <div class="col-12">
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        @TempData["InfoMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            }
+
+            @if (!Model.Any())
+            {
+                <div class="col-12 text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-heart fa-4x text-muted"></i>
+                    </div>
+                    <h2>Your wishlist is empty</h2>
+                    <p class="text-muted mb-4">Add items to your wishlist to save them for later.</p>
+                    <a href="/" class="btn btn-primary">Continue Shopping</a>
+                </div>
+            }
+            else
+            {
+                <div class="col-12">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="border-0">Product</th>
+                                            <th class="border-0">Price</th>
+                                            <th class="border-0">Stock Status</th>
+                                            <th class="border-0">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="@(string.IsNullOrEmpty(item.Product.ImagePath) ? "/images/default-placeholder.png" : item.Product.ImagePath)"
+                                                             alt="@item.Product.Name" width="60" class="me-3" />
+                                                        <div>
+                                                            <h6 class="mb-0">@item.Product.Name</h6>
+                                                            <small class="text-muted">@item.Product.Category?.Name</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>$@item.Product.Price.ToString("F2")</td>
+                                                <td>
+                                                    @if (item.Product.StockQuantity > 0)
+                                                    {
+                                                        <span class="badge bg-success">In Stock</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-danger">Out of Stock</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex">
+                                                        <form asp-controller="Wishlist" asp-action="MoveToCart" method="post" class="me-2">
+                                                            <input type="hidden" name="wishlistId" value="@item.WishlistId" />
+                                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                                <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+                                                            </button>
+                                                        </form>
+                                                        <form asp-controller="Wishlist" asp-action="RemoveFromWishlist" method="post" class="me-2">
+                                                            <input type="hidden" name="wishlistId" value="@item.WishlistId" />
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                                onclick="addToCompare(@item.ProductId)">
+                                                            <i class="fas fa-exchange-alt"></i> Compare
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i> Continue Shopping
+                        </a>
+                        <form asp-controller="Wishlist" asp-action="MoveAllToCart" method="post">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-2"></i> Add All to Cart
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function addToCompare(productId) {
+            fetch('/Compare/AddToCompare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'productId=' + productId
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Product added to compare list!');
+                    // Optionally redirect to compare page
+                    // window.location.href = '/Compare';
+                } else {
+                    throw new Error('Failed to add to compare list');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to add to compare list. Please try again.');
+            });
+        }
+    </script>
+}

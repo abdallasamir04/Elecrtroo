@@ -1,0 +1,27 @@
+﻿@model Electro_ECommerce.Models.Order
+
+<h2>Order Details - @Model.OrderId</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var detail in Model.OrderDetails)
+        {
+            <tr>
+                <td>@detail.Product.Name</td>
+                <td>@detail.Quantity</td>
+                <td>@detail.UnitPrice.ToString("C")</td>
+                <td>@detail.Subtotal.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p><strong>Total Amount:</strong> @Model.TotalAmount.ToString("C")</p>

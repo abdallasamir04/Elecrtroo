@@ -1,0 +1,270 @@
+﻿@model List<ProductViewModel>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text animate-on-scroll">
+                <h1>Discover the Future of Tech</h1>
+                <p>Experience the latest in technology with our premium selection of electronics. From cutting-edge smartphones to powerful laptops, we've got everything you need.</p>
+                <a href="#featured-products" class="btn btn-light btn-lg">Shop Now <i class="fas fa-arrow-right ms-2"></i></a>
+            </div>
+            <div class="hero-image animate-on-scroll">
+                <img src="/img/product01.png" alt="Featured Product" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Categories -->
+<div class="section">
+    <div class="container">
+        <div class="section-title animate-on-scroll">
+            <h3 class="title">Shop by Category</h3>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="category-card animate-on-scroll">
+                    <a href="/Home/Search?query=Laptops" class="d-block text-center p-4 rounded bg-light shadow-sm">
+                        <i class="fas fa-laptop fa-3x mb-3 text-primary"></i>
+                        <h5>Laptops</h5>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6 mb-4">
+                <div class="category-card animate-on-scroll">
+                    <a href="/Home/Search?query=Smartphones" class="d-block text-center p-4 rounded bg-light shadow-sm">
+                        <i class="fas fa-mobile-alt fa-3x mb-3 text-primary"></i>
+                        <h5>Smartphones</h5>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6 mb-4">
+                <div class="category-card animate-on-scroll">
+                    <a href="/Home/Search?query=Cameras" class="d-block text-center p-4 rounded bg-light shadow-sm">
+                        <i class="fas fa-camera fa-3x mb-3 text-primary"></i>
+                        <h5>Cameras</h5>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6 mb-4">
+                <div class="category-card animate-on-scroll">
+                    <a href="/Home/Search?query=Accessories" class="d-block text-center p-4 rounded bg-light shadow-sm">
+                        <i class="fas fa-headphones fa-3x mb-3 text-primary"></i>
+                        <h5>Accessories</h5>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Promotional Banner -->
+<div class="section">
+    <div class="container">
+        <div class="poster-center-box animate-on-scroll">
+            <div class="text-left">
+                <div class="small">Limited Time Offer</div>
+                <h1>FLASH<br>SALE</h1>
+                <a href="#" class="btn btn-light mt-3">Shop Now</a>
+            </div>
+
+            <img src="https://cdn.prod.website-files.com/676a58d5fdde7ec989f63f29/676a58d5fdde7ec989f63f44_ads1-1.png"
+                 alt="Smart Watch"
+                 class="poster-product-image">
+
+            <div class="text-right">
+                <div class="small">Up to 50% Off</div>
+                <h2>Tech Deals</h2>
+                <p class="mb-0">Ends in 48 hours</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Products Section -->
+<div class="section" id="featured-products">
+    <div class="container">
+        <div class="row">
+            <!-- section title -->
+            <div class="col-md-12">
+                <div class="section-title animate-on-scroll">
+                    <h3 class="title">New Products</h3>
+                </div>
+            </div>
+
+            <!-- Products -->
+            <div class="container">
+                <div class="row">
+                    @foreach (var item in Model)
+                    {
+                        <div class="col-md-4 col-lg-3 product-item animate-on-scroll" data-category="@item.CategoryName">
+                            <div class="product">
+                                <div class="product-img">
+                                    <img src="@(string.IsNullOrEmpty(item.ImagePath) ? "/images/default-placeholder.png" : item.ImagePath)"
+                                         alt="@item.Name" />
+                                    <div class="product-label">
+                                        <span class="new">NEW</span>
+                                    </div>
+                                </div>
+                                <div class="product-body">
+                                    <p class="product-category">@item.CategoryName</p>
+                                    <h3 class="product-name"><a href="/Home/Details/@item.ProductId">@item.Name</a></h3>
+                                    <h4 class="product-price">$@item.Price <del class="product-old-price">$@(item.Price * 1.2m)</del></h4>
+                                    <div class="product-rating">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-half-o"></i>
+                                    </div>
+                                    <div class="product-btns">
+                                        <button class="add-to-wishlist" onclick="addToWishlist(@item.ProductId)"><i class="fa fa-heart-o"></i><span class="tooltipp">Add to wishlist</span></button>
+                                        <button class="add-to-compare" onclick="addToCompare(@item.ProductId)"><i class="fa fa-exchange"></i><span class="tooltipp">Compare</span></button>
+                                        <button class="quick-view" onclick="openQuickView(@item.ProductId, '@item.Name', @item.Price, '@(item.Description ?? "")', '@(string.IsNullOrEmpty(item.ImagePath) ? "/images/default-placeholder.png" : item.ImagePath)')"><i class="fa fa-eye"></i><span class="tooltipp">Quick view</span></button>
+                                    </div>
+                                </div>
+                                <div class="add-to-cart">
+                                    <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                                        <input type="hidden" name="ProductId" value="@item.ProductId" />
+                                        <button type="submit" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Add to cart</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Newsletter -->
+<div id="newsletter" class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="newsletter">
+                    <p>Sign Up for the <strong>NEWSLETTER</strong></p>
+                    <form>
+                        <input class="input" type="email" placeholder="Enter Your Email"><button class="newsletter-btn"><i class="fa fa-envelope"></i> Subscribe</button>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick View Modal -->
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickViewName"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex">
+                <div class="modal-image pe-4">
+                    <img id="quickViewImage" src="/images/default-placeholder.png" alt="Product Image" class="img-fluid" />
+                </div>
+                <div class="modal-details">
+                    <h4 id="quickViewPrice" class="text-success"></h4>
+                    <p id="quickViewDescription"></p>
+                    <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                        <input type="hidden" id="quickViewProductId" name="ProductId" value="" />
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize animations
+            function animateOnScroll() {
+                $('.animate-on-scroll').each(function() {
+                    var position = $(this).offset().top;
+                    var scroll = $(window).scrollTop();
+                    var windowHeight = $(window).height();
+
+                    if (scroll + windowHeight > position + 100) {
+                        $(this).addClass('animate-fade-in');
+                    }
+                });
+            }
+
+            // Run on page load
+            animateOnScroll();
+
+            // Run on scroll
+            $(window).scroll(function() {
+                animateOnScroll();
+            });
+        });
+
+        // Global functions for product interactions
+        function addToWishlist(productId) {
+            fetch('/Wishlist/AddToWishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Product added to wishlist!');
+                } else if (response.status === 401) {
+                    window.location.href = '/Account/Login';
+                } else {
+                    throw new Error('Failed to add to wishlist');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function addToCompare(productId) {
+            fetch('/Compare/AddToCompare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Product added to compare list!');
+                } else {
+                    throw new Error('Failed to add to compare list');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Make sure the quick view modal is working
+        function openQuickView(productId, name, price, description, image) {
+            document.getElementById('quickViewProductId').value = productId;
+            document.getElementById('quickViewName').textContent = name;
+            document.getElementById('quickViewPrice').textContent = '$' + price.toFixed(2);
+            document.getElementById('quickViewDescription').textContent = description;
+            document.getElementById('quickViewImage').src = image || '/images/default-placeholder.png';
+
+            var quickViewModal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+            quickViewModal.show();
+        }
+    </script>
+}

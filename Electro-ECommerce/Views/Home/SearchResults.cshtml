@@ -1,0 +1,162 @@
+﻿@model List<ProductViewModel>
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="mb-4">Search Results for: "@ViewBag.SearchQuery"</h2>
+                <p>Found @Model.Count products matching your search.</p>
+            </div>
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <div class="row">
+                <div class="col-md-12 text-center py-5">
+                    <h3>No products found matching your search.</h3>
+                    <p>Try different keywords or browse our categories.</p>
+                    <a href="/" class="btn btn-primary mt-3">Return to Home</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var item in Model)
+                {
+                    <div class="col-md-4 col-lg-3 product-item animate-on-scroll" data-category="@item.CategoryName">
+                        <div class="product">
+                            <div class="product-img">
+                                <img src="@(string.IsNullOrEmpty(item.ImagePath) ? "/images/default-placeholder.png" : item.ImagePath)"
+                                     alt="@item.Name" />
+                                <div class="product-label">
+                                    @if (item.IsOnSale)
+                                    {
+                                        <span class="sale">SALE</span>
+                                    }
+                                    @if (item.IsNew)
+                                    {
+                                        <span class="new">NEW</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="product-body">
+                                <p class="product-category">@item.CategoryName</p>
+                                <h3 class="product-name"><a href="/Home/Details/@item.ProductId">@item.Name</a></h3>
+                                <h4 class="product-price">
+                                    $@item.Price.ToString("F2")
+                                    @if (item.OriginalPrice.HasValue)
+                                    {
+                                        <del class="product-old-price">$@item.OriginalPrice.Value.ToString("F2")</del>
+                                    }
+                                </h4>
+                                <div class="product-rating">
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star-half-o"></i>
+                                </div>
+                                <div class="product-btns">
+                                    <button class="add-to-wishlist" onclick="addToWishlist(@item.ProductId)"><i class="fa fa-heart-o"></i><span class="tooltipp">Add to wishlist</span></button>
+                                    <button class="add-to-compare" onclick="addToCompare(@item.ProductId)"><i class="fa fa-exchange"></i><span class="tooltipp">Compare</span></button>
+                                    <button class="quick-view" onclick="openQuickView(@item.ProductId, '@item.Name', @item.Price, '@(item.Description ?? "")', '@(string.IsNullOrEmpty(item.ImagePath) ? "/images/default-placeholder.png" : item.ImagePath)')"><i class="fa fa-eye"></i><span class="tooltipp">Quick view</span></button>
+                                </div>
+                            </div>
+                            <div class="add-to-cart">
+                                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                                    <input type="hidden" name="ProductId" value="@item.ProductId" />
+                                    <button type="submit" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Add to cart</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize animations
+            function animateOnScroll() {
+                $('.animate-on-scroll').each(function() {
+                    var position = $(this).offset().top;
+                    var scroll = $(window).scrollTop();
+                    var windowHeight = $(window).height();
+
+                    if (scroll + windowHeight > position + 100) {
+                        $(this).addClass('animate-fade-in');
+                    }
+                });
+            }
+
+            // Run on page load
+            animateOnScroll();
+
+            // Run on scroll
+            $(window).scroll(function() {
+                animateOnScroll();
+            });
+        });
+
+        // Global functions for product interactions
+        function addToWishlist(productId) {
+            fetch('/Wishlist/AddToWishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Product added to wishlist!');
+                } else if (response.status === 401) {
+                    window.location.href = '/Account/Login';
+                } else {
+                    throw new Error('Failed to add to wishlist');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function addToCompare(productId) {
+            fetch('/Compare/AddToCompare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Product added to compare list!');
+                } else {
+                    throw new Error('Failed to add to compare list');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function openQuickView(productId, name, price, description, image) {
+            document.getElementById('quickViewProductId').value = productId;
+            document.getElementById('quickViewName').textContent = name;
+            document.getElementById('quickViewPrice').textContent = '$' + price.toFixed(2);
+            document.getElementById('quickViewDescription').textContent = description;
+            document.getElementById('quickViewImage').src = image || '/images/default-placeholder.png';
+
+            var quickViewModal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+            quickViewModal.show();
+        }
+    </script>
+}

@@ -1,0 +1,227 @@
+﻿@model Checkout
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/ShoppingCart">Shopping Cart</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+                    </ol>
+                </nav>
+                <h1 class="h2 mb-4">Checkout</h1>
+            </div>
+
+            <div class="col-12 mb-4">
+                <div class="checkout-steps">
+                    <div class="checkout-step active">
+                        <span>1. Shipping</span>
+                    </div>
+                    <div class="checkout-step">
+                        <span>2. Payment</span>
+                    </div>
+                    <div class="checkout-step">
+                        <span>3. Confirmation</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Shipping Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="Checkout" asp-action="ProcessCheckout" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="FirstName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="LastName" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="Email" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phone" name="PhoneNumber" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="address" name="Address" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-5 mb-3">
+                                    <label for="country" class="form-label">Country</label>
+                                    <select class="form-select" id="country" name="Country" required>
+                                        <option value="">Choose...</option>
+                                        <option value="US">United States</option>
+                                        <option value="CA">Canada</option>
+                                        <option value="UK">United Kingdom</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="state" class="form-label">State</label>
+                                    <select class="form-select" id="state" name="State" required>
+                                        <option value="">Choose...</option>
+                                        <option value="CA">California</option>
+                                        <option value="NY">New York</option>
+                                        <option value="TX">Texas</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="zip" class="form-label">Zip</label>
+                                    <input type="text" class="form-control" id="zip" name="ZipCode" required>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h5 class="mb-3">Payment Method</h5>
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="PaymentMethod" id="creditCard" value="CreditCard" checked>
+                                <label class="form-check-label" for="creditCard">
+                                    Credit Card
+                                </label>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="cardName" class="form-label">Name on card</label>
+                                    <input type="text" class="form-control" id="cardName" name="CardName">
+                                    <small class="text-muted">Full name as displayed on card</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cardNumber" class="form-label">Card number</label>
+                                    <input type="text" class="form-control" id="cardNumber" name="CardNumber">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="expMonth" class="form-label">Expiration Month</label>
+                                    <select class="form-select" id="expMonth" name="ExpMonth">
+                                        @for (int i = 1; i <= 12; i++)
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="expYear" class="form-label">Expiration Year</label>
+                                    <select class="form-select" id="expYear" name="ExpYear">
+                                        @for (int i = DateTime.Now.Year; i <= DateTime.Now.Year + 10; i++)
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" name="Cvv">
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="PaymentMethod" id="paypal" value="PayPal">
+                                <label class="form-check-label" for="paypal">
+                                    PayPal
+                                </label>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <button class="btn btn-primary btn-lg w-100" type="submit">Place Order</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <div class="d-flex mb-3">
+                                <img src="@(string.IsNullOrEmpty(item.Product.ImagePath) ? "/images/default-placeholder.png" : item.Product.ImagePath)"
+                                     alt="@item.Product.Name" width="60" class="me-3" />
+                                <div>
+                                    <h6 class="mb-0">@item.Product.Name</h6>
+                                    <small class="text-muted">Qty: @item.Quantity</small>
+                                    <div>$@((item.Product.Price * item.Quantity).ToString("F2"))</div>
+                                </div>
+                            </div>
+                        }
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <span>$@Model.Subtotal.ToString("F2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax</span>
+                            <span>$@Model.Tax.ToString("F2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping</span>
+                            <span>$@Model.Shipping.ToString("F2")</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-0">
+                            <strong>Total</strong>
+                            <strong>$@Model.Total.ToString("F2")</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="mb-3">Need Help?</h6>
+                        <p class="mb-0">
+                            <i class="fas fa-phone me-2"></i> +1 (800) 123-4567
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-envelope me-2"></i> support@electro.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Toggle payment method details
+            $('input[name="PaymentMethod"]').change(function() {
+                if ($(this).val() === 'CreditCard') {
+                    $('#cardName, #cardNumber, #expMonth, #expYear, #cvv').prop('disabled', false);
+                } else {
+                    $('#cardName, #cardNumber, #expMonth, #expYear, #cvv').prop('disabled', true);
+                }
+            });
+        });
+    </script>
+}
