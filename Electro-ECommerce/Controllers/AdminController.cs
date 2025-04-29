@@ -372,7 +372,7 @@ namespace Electro_ECommerce.Controllers
                 return NotFound();
             }
 
-            return View(order);
+            return View("OrderDetails", order); // uses Views/Admin/OrderDetails.cshtml
         }
 
         // POST: Admin/UpdateOrderStatus

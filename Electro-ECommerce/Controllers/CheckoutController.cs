@@ -14,6 +14,7 @@ using System.Security.Claims;
 namespace Electro_ECommerce.Controllers
 {
     [Authorize]
+
     public class CheckoutController : Controller
     {
         private readonly TechXpressDbContext _context;

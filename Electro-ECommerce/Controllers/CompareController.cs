@@ -22,6 +22,8 @@ namespace Electro_ECommerce.Controllers
             _context = context;
         }
 
+
+
         public async Task<IActionResult> Index()
         {
             var compareList = GetCompareListFromSession();

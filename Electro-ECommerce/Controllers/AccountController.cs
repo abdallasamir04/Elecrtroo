@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
@@ -42,20 +43,28 @@ namespace Electro_ECommerce.Controllers
 
             if (ModelState.IsValid)
             {
-                // This allows login with either username or email
-                var userName = model.Email;
+                // Find user by email
                 var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user != null)
+                if (user == null)
                 {
-                    userName = user.UserName;
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return View(model);
                 }
 
+                // Sign in the user
                 var result = await _signInManager.PasswordSignInAsync(
-                    userName, model.Password, model.RememberMe, lockoutOnFailure: false);
+                    user.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+
+                    // Check if user is in Admin role
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        return RedirectToAction("Index", "Admin");
+                    }
+
                     return RedirectToLocal(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
@@ -74,7 +83,6 @@ namespace Electro_ECommerce.Controllers
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return View(model);
         }
 
@@ -125,7 +133,6 @@ namespace Electro_ECommerce.Controllers
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return View(model);
         }
 
@@ -185,6 +192,13 @@ namespace Electro_ECommerce.Controllers
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
+
+                // Check if user is admin after 2FA
+                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+
                 return RedirectToLocal(returnUrl);
             }
             else if (result.IsLockedOut)
@@ -200,7 +214,6 @@ namespace Electro_ECommerce.Controllers
             }
         }
 
-        // Create admin account manually
         [HttpGet]
         public IActionResult CreateAdmin()
         {
@@ -259,6 +272,11 @@ namespace Electro_ECommerce.Controllers
 
         private IActionResult RedirectToLocal(string? returnUrl)
         {
+            if (User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Index", "Admin");
+            }
+
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);

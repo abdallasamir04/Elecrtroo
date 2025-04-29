@@ -1,0 +1,50 @@
+﻿@model IEnumerable<Electro_ECommerce.Models.Order>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>#@order.OrderId</td>
+                <td>@(order.User?.UserName ?? "Unknown")</td>
+                <td>
+                    @(order.OrderDate.HasValue
+                        ? order.OrderDate.Value.ToString("dd MMM yyyy")
+                        : "N/A")
+                </td>
+                <td>@order.TotalAmount.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
+                <td>
+                    <span class="badge @GetStatusBadgeClass(order.Status)">
+                        @order.Status
+                    </span>
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-primary" asp-action="OrderDetails" asp-route-id="@order.OrderId">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Completed" => "bg-success",
+            "Processing" => "bg-primary",
+            "Cancelled" => "bg-danger",
+            _ => "bg-warning"
+        };
+    }
+}

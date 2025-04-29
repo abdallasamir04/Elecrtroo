@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Electro_ECommerce.Data;
+using Electro_ECommerce.Repositories;
 using Electro_ECommerce.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +28,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options => {
 
 builder.Services.AddControllersWithViews();
 
-// Add this after the builder.Services.AddControllersWithViews() line
+// Session configuration
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -33,7 +36,10 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Add AdminSeeder as a scoped service
+// Repository registration
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// Admin seeder
 builder.Services.AddScoped<AdminSeeder>();
 
 var app = builder.Build();
@@ -42,7 +48,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -52,10 +57,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
-
-// Add this before app.UseAuthorization()
 app.UseSession();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(
