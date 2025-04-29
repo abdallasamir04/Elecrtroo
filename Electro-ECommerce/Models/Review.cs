@@ -1,16 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 
-namespace Electro_ECommerce.Models
+namespace Electro_ECommerce.Models;
+
+public partial class Review
 {
-    public class Review
-    {
-        public int ReviewId { get; set; }
-        public string UserName { get; set; } = string.Empty;
-        public int Rating { get; set; }
-        public string Comment { get; set; } = string.Empty;
-        public DateTime Date { get; set; }
+    public int ReviewId { get; set; }
 
-        public int ProductId { get; set; }
-        public virtual Product Product { get; set; }  // Foreign key to Product
-    }
+    public int ProductId { get; set; }
+
+    public string UserName { get; set; } = null!;
+
+    public int Rating { get; set; }
+
+    public string? Comment { get; set; }
+
+    public DateTime Date { get; set; }
+
+    public virtual Product Product { get; set; } = null!;
 }

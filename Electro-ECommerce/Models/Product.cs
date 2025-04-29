@@ -1,45 +1,54 @@
-﻿using Electro_ECommerce.Models;
-
-using Stripe;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Electro_ECommerce.Models
 {
-    public class Product
+    public partial class Product
     {
         public int ProductId { get; set; }
 
         [Required]
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; } = null!;
+
+        public string? Description { get; set; }
 
         [Required]
-        public string Description { get; set; } = string.Empty;
-
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
-
-        public int StockQuantity { get; set; }
-
-        public int CategoryId { get; set; }
 
         public string? ImagePath { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public int CategoryId { get; set; }
 
-        public DateTime UpdatedAt { get; set; }
+        [NotMapped]
+        public string? CategoryName => Category?.Name;
 
-        // Add this missing property
+        public int StockQuantity { get; set; }
+
+        public bool IsOnSale { get; set; }
+
+        public bool IsNew { get; set; }
+
+        public bool IsFeatured { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
         public decimal DiscountPercentage { get; set; }
 
-        // Navigation properties
-        public Category? Category { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public virtual ICollection<Review>? Reviews { get; set; }  // <-- Add this
+        public DateTime? UpdatedAt { get; set; }
 
-        // Collection navigation properties
-        public virtual ICollection<ShoppingCart>? ShoppingCarts { get; set; }
-        public virtual ICollection<OrderDetail>? OrderDetails { get; set; }
-        public virtual ICollection<PromotionProduct>? PromotionProducts { get; set; }
+        public virtual Category Category { get; set; } = null!;
+
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+        public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new List<ShoppingCart>();
+
+        public virtual ICollection<PromotionProduct> PromotionProducts { get; set; } = new List<PromotionProduct>();
+
     }
 }

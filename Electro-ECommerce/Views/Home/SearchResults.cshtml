@@ -53,24 +53,23 @@
                                         <del class="product-old-price">$@item.OriginalPrice.Value.ToString("F2")</del>
                                     }
                                 </h4>
-                                <div class="product-rating">
-                                    <i class="fa fa-star"></i>
-                                    <i class="fa fa-star"></i>
-                                    <i class="fa fa-star"></i>
-                                    <i class="fa fa-star"></i>
-                                    <i class="fa fa-star-half-o"></i>
+
+                                <!-- Product Rating Stars -->
+
+
+                                <div class="d-flex flex-column align-items-center gap-2">
+                                    <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                        <input type="hidden" name="quantity" value="1" />
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+                                        </button>
+                                    </form>
+
+                                    <a href="/Home/Details/@item.ProductId" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-info-circle me-2"></i> View Details
+                                    </a>
                                 </div>
-                                <div class="product-btns">
-                                    <button class="add-to-wishlist" onclick="addToWishlist(@item.ProductId)"><i class="fa fa-heart-o"></i><span class="tooltipp">Add to wishlist</span></button>
-                                    <button class="add-to-compare" onclick="addToCompare(@item.ProductId)"><i class="fa fa-exchange"></i><span class="tooltipp">Compare</span></button>
-                                    <button class="quick-view" onclick="openQuickView(@item.ProductId, '@item.Name', @item.Price, '@(item.Description ?? "")', '@(string.IsNullOrEmpty(item.ImagePath) ? "/images/default-placeholder.png" : item.ImagePath)')"><i class="fa fa-eye"></i><span class="tooltipp">Quick view</span></button>
-                                </div>
-                            </div>
-                            <div class="add-to-cart">
-                                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
-                                    <input type="hidden" name="ProductId" value="@item.ProductId" />
-                                    <button type="submit" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Add to cart</button>
-                                </form>
                             </div>
                         </div>
                     </div>
@@ -82,29 +81,6 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            // Initialize animations
-            function animateOnScroll() {
-                $('.animate-on-scroll').each(function() {
-                    var position = $(this).offset().top;
-                    var scroll = $(window).scrollTop();
-                    var windowHeight = $(window).height();
-
-                    if (scroll + windowHeight > position + 100) {
-                        $(this).addClass('animate-fade-in');
-                    }
-                });
-            }
-
-            // Run on page load
-            animateOnScroll();
-
-            // Run on scroll
-            $(window).scroll(function() {
-                animateOnScroll();
-            });
-        });
-
         // Global functions for product interactions
         function addToWishlist(productId) {
             fetch('/Wishlist/AddToWishlist', {
@@ -146,17 +122,6 @@
                 }
             })
             .catch(error => console.error('Error:', error));
-        }
-
-        function openQuickView(productId, name, price, description, image) {
-            document.getElementById('quickViewProductId').value = productId;
-            document.getElementById('quickViewName').textContent = name;
-            document.getElementById('quickViewPrice').textContent = '$' + price.toFixed(2);
-            document.getElementById('quickViewDescription').textContent = description;
-            document.getElementById('quickViewImage').src = image || '/images/default-placeholder.png';
-
-            var quickViewModal = new bootstrap.Modal(document.getElementById('quickViewModal'));
-            quickViewModal.show();
         }
     </script>
 }

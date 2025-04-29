@@ -84,6 +84,8 @@
                                         <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index"><i class="fas fa-user me-2"></i>Profile</a></li>
                                         <li><a class="dropdown-item" asp-controller="Order" asp-action="Index"><i class="fas fa-box me-2"></i>Orders</a></li>
                                         <li><a class="dropdown-item" asp-controller="Wishlist" asp-action="Index"><i class="fas fa-heart me-2"></i>Wishlist</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Compare" asp-action="Index"><i class="fas fa-heart me-2"></i>Comparelist</a></li>
+
                                         @if (User.IsInRole("Admin"))
                                         {
                                             <li><hr class="dropdown-divider"></li>
