@@ -1,27 +1,182 @@
 ﻿@model Electro_ECommerce.Models.Order
+@{
+    ViewData["Title"] = "Order Details";
+}
 
-<h2>Order Details - @Model.OrderId</h2>
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/Order">My Orders</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Order #@Model.OrderId</li>
+                    </ol>
+                </nav>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="h2 mb-0">Order #@Model.OrderId</h1>
+                    <a href="/Order" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Orders
+                    </a>
+                </div>
+            </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Product Name</th>
-            <th>Quantity</th>
-            <th>Unit Price</th>
-            <th>Subtotal</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var detail in Model.OrderDetails)
-        {
-            <tr>
-                <td>@detail.Product.Name</td>
-                <td>@detail.Quantity</td>
-                <td>@detail.UnitPrice.ToString("C")</td>
-                <td>@detail.Subtotal.ToString("C")</td>
-            </tr>
-        }
-    </tbody>
-</table>
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="col-12">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            }
 
-<p><strong>Total Amount:</strong> @Model.TotalAmount.ToString("C")</p>
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Order Items</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderDetails)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(string.IsNullOrEmpty(item.Product.ImagePath) ? "/images/default-placeholder.png" : item.Product.ImagePath)"
+                                                         alt="@item.Product.Name" width="50" class="me-3">
+                                                    <div>
+                                                        <h6 class="mb-0">
+                                                            <a href="/Home/Details/@item.ProductId" class="text-decoration-none">@item.Product.Name</a>
+                                                        </h6>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>$@item.UnitPrice.ToString("F2")</td>
+                                            <td>@item.Quantity</td>
+                                            <td class="text-end">$@item.Subtotal.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                        <td class="text-end">$@(Model.TotalAmount * 0.9m)</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Tax (10%):</strong></td>
+                                        <td class="text-end">$@(Model.TotalAmount * 0.1m)</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                        <td class="text-end"><strong>$@Model.TotalAmount.ToString("F2")</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Order Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">Order Status</h6>
+                            @switch (Model.Status)
+                            {
+                                case "Pending":
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    break;
+                                case "Processing":
+                                    <span class="badge bg-info">Processing</span>
+                                    break;
+                                case "Shipped":
+                                    <span class="badge bg-primary">Shipped</span>
+                                    break;
+                                case "Delivered":
+                                    <span class="badge bg-success">Delivered</span>
+                                    break;
+                                case "Cancelled":
+                                    <span class="badge bg-danger">Cancelled</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary">@Model.Status</span>
+                                    break;
+                            }
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">Order Date</h6>
+                            <p class="mb-0">@Model.OrderDate?.ToString("MMMM dd, yyyy")</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">Payment Method</h6>
+                            <p class="mb-0">
+                                @if (Model.Payments.Any())
+                                {
+                                    @Model.Payments.First().PaymentMethod
+                                }
+                                else
+                                {
+                                    <span>Not specified</span>
+                                }
+                            </p>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-2">Payment Status</h6>
+                            @if (Model.Payments.Any())
+                            {
+                                var payment = Model.Payments.First();
+                                @switch (payment.PaymentStatus)
+                                {
+                                    case "Pending":
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        break;
+                                    case "Completed":
+                                        <span class="badge bg-success">Completed</span>
+                                        break;
+                                    case "Failed":
+                                        <span class="badge bg-danger">Failed</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@payment.PaymentStatus</span>
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Not Available</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.Status == "Pending")
+                {
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h6 class="mb-3">Order Actions</h6>
+                            <a href="@Url.Action("Cancel", new { id = Model.OrderId })" class="btn btn-danger w-100">
+                                <i class="fas fa-times me-2"></i> Cancel Order
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

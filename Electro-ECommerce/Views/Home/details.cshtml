@@ -1,388 +1,512 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+﻿@model ProductDetailsViewModel
+@{
+    ViewData["Title"] = Model.Name;
+}
 
-	<title>Electro - HTML Ecommerce Template</title>
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/Home/Search?query=@Model.CategoryName">@Model.CategoryName</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+                    </ol>
+                </nav>
+            </div>
 
-	<!-- Google font -->
-	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="col-12">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            }
 
-	<!-- Bootstrap -->
-	<link type="text/css" rel="stylesheet" href="css/bootstrap.min.css" />
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="col-12">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            }
+        </div>
 
-	<!-- Slick -->
-	<link type="text/css" rel="stylesheet" href="css/slick.css" />
-	<link type="text/css" rel="stylesheet" href="css/slick-theme.css" />
+       <div class="row">
+    <!-- Product main img -->
+    <div class="col-md-5 col-lg-5">
+        <div id="product-main-img">
+            <div class="product-preview">
+                <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/default-placeholder.png" : Model.ImagePath)" alt="@Model.Name" class="img-fluid">
+            </div>
+        </div>
 
-	<!-- nouislider -->
-	<link type="text/css" rel="stylesheet" href="css/nouislider.min.css" />
+        <!-- Compact action buttons under image -->
+        <div class="mt-3">
+            <div class="d-flex flex-wrap gap-2">
+                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                    <input type="hidden" name="productId" value="@Model.ProductId" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button type="submit" class="btn btn-sm btn-primary text-nowrap">
+                        <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+                    </button>
+                </form>
 
-	<!-- Font Awesome Icon -->
-	<link rel="stylesheet" href="css/font-awesome.min.css">
+                <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="addToWishlist(@Model.ProductId)">
+                    <i class="fas fa-heart me-1"></i> Wishlist
+                </button>
 
-	<!-- Custom stlylesheet -->
-	<link type="text/css" rel="stylesheet" href="css/style.css" />
+                <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="addToCompare(@Model.ProductId)">
+                    <i class="fas fa-exchange-alt me-1"></i> Compare
+                </button>
+            </div>
+        </div>
+        <!-- /Compact action buttons -->
+    </div>
+    <!-- /Product main img -->
 
-	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-	<!--[if lt IE 9]>
-	  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-	  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-	<![endif]-->
 
-</head>
-<body>
-	<!-- HEADER -->
-	<header>
-		<!-- TOP HEADER -->
-		
-		<!-- /TOP HEADER -->
-		<!-- MAIN HEADER -->
-		
-		<!-- /MAIN HEADER -->
-	</header>
-	<!-- /HEADER -->
-	<!-- NAVIGATION -->
-	
-	<!-- /NAVIGATION -->
-	
-	<!-- SECTION -->
-	<div class="section">
-		<!-- container -->
-		<div class="container">
-			<!-- row -->
-			<div class="row">
-				<!-- Product main img -->
-				<div class="col-md-5 col-md-push-2">
-					<div id="product-main-img">
-						<div class="product-preview">
-							<img src="./img/product01.png" alt="">
-						</div>
 
-						<div class="product-preview">
-							<img src="./img/product03.png" alt="">
-						</div>
+            <!-- /Product main img
 
-						<div class="product-preview">
-							<img src="./img/product06.png" alt="">
-						</div>
 
-						<div class="product-preview">
-							<img src="./img/product08.png" alt="">
-						</div>
-					</div>
-				</div>
-				<!-- /Product main img -->
-				<!-- Product thumb imgs -->
-				<div class="col-md-2  col-md-pull-5">
-					<div id="product-imgs">
-						<div class="product-preview">
-							<img src="~/./img/product01.png" alt="">
-						</div>
+            -->
+            <!-- Product details -->
+            <div class="col-md-7 col-lg-7">
+                <div class="product-details">
+                    <h2 class="product-name">@Model.Name</h2>
+                    <div>
+                        <div class="product-rating">
+                            @{
+                                var avgRating = Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
+                                for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= avgRating)
+                                    {
+                                        <i class="fa fa-star"></i>
+                                    }
+                                    else if (i - 0.5 <= avgRating)
+                                    {
+                                        <i class="fa fa-star-half-o"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa fa-star-o"></i>
+                                    }
+                                }
+                            }
+                        </div>
+                        <a class="review-link" href="#reviews">@Model.Reviews.Count Review(s) | Add your review</a>
+                    </div>
+                    <div>
+                        <h3 class="product-price">
+                            $@Model.Price.ToString("F2")
+                            @if (Model.OriginalPrice.HasValue)
+                            {
+                                <del class="product-old-price">$@Model.OriginalPrice.Value.ToString("F2")</del>
+                            }
+                        </h3>
+                        <span class="product-available">@(Model.IsInStock ? "In Stock" : "Out of Stock")</span>
+                    </div>
+                    <p>@Model.Description</p>
 
-						<div class="product-preview">
-							<img src="~/./img/product03.png" alt="">
-						</div>
+                    @if (Model.AvailableOptions != null && Model.AvailableOptions.Any())
+                    {
+                        <div class="product-options">
+                            @foreach (var option in Model.AvailableOptions)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">@option.Key</label>
+                                    <div class="d-flex gap-2">
+                                        @foreach (var value in option.Value)
+                                        {
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="@option.Key.ToLower()" id="@(option.Key.ToLower())_@value.ToLower()" value="@value">
+                                                <label class="form-check-label" for="@(option.Key.ToLower())_@value.ToLower()">
+                                                    @value
+                                                </label>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
 
-						<div class="product-preview">
-							<img src="~/./img/product06.png" alt="">
-						</div>
+                    <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post" id="addToCartForm">
+                        <input type="hidden" name="productId" value="@Model.ProductId" />
+                        <div class="product-btns">
+                            <div class="qty-input d-flex align-items-center mb-3">
+                                <span class="text-uppercase me-2">QTY: </span>
+                                <div class="input-group" style="width: 130px;">
+                                    <button type="button" class="btn btn-outline-secondary" id="decreaseQty">-</button>
+                                    <input type="number" name="quantity" id="quantity" class="form-control text-center" value="1" min="1" max="@Model.StockQuantity">
+                                    <button type="button" class="btn btn-outline-secondary" id="increaseQty">+</button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg mb-3" @(Model.IsInStock ? "" : "disabled")>
+                                <i class="fa fa-shopping-cart me-2"></i> Add to Cart
+                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary" onclick="addToWishlist(@Model.ProductId)">
+                                    <i class="fa fa-heart-o me-2"></i> Add to Wishlist
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="addToCompare(@Model.ProductId)">
+                                    <i class="fa fa-exchange me-2"></i> Add to Compare
+                                </button>
+                            </div>
+                        </div>
+                    </form>
 
-						<div class="product-preview">
-							<img src="~/./img/product08.png" alt="">
-						</div>
-					</div>
-				</div>
-				<!-- /Product thumb imgs -->
-				<!-- Product details -->
-				<div class="col-md-5">
-					<div class="product-details">
-						<h2 class="product-name">product name goes here</h2>
-						<div>
-							<div class="product-rating">
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star-o"></i>
-							</div>
-							<a class="review-link" href="#">10 Review(s) | Add your review</a>
-						</div>
-						<div>
-							<h3 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h3>
-							<span class="product-available">In Stock</span>
-						</div>
-						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    <ul class="product-links mt-4">
+                        <li>Category:</li>
+                        <li><a href="/Home/Search?query=@Model.CategoryName">@Model.CategoryName</a></li>
+                    </ul>
+                </div>
+            </div>
+            <!-- /Product details -->
+            <!-- Product tab -->
+            <div class="col-md-12 mt-5">
+                <div id="product-tab">
+                    <!-- product tab nav -->
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="false">Details</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Reviews (@Model.Reviews.Count)</button>
+                        </li>
+                    </ul>
+                    <!-- /product tab nav -->
+                    <!-- product tab content -->
+                    <div class="tab-content" id="myTabContent">
+                        <!-- tab1  -->
+                        <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                            <div class="p-4">
+                                <p>@Model.Description</p>
+                            </div>
+                        </div>
+                        <!-- /tab1  -->
+                        <!-- tab2  -->
+                        <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
+                            <div class="p-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4>Product Specifications</h4>
+                                        <table class="table table-striped">
+                                            <tbody>
+                                                @if (Model.Specifications != null)
+                                                {
+                                                    @foreach (var spec in Model.Specifications)
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@spec.Key</strong></td>
+                                                            <td>@spec.Value</td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h4>Product Features</h4>
+                                        <ul class="list-group">
+                                            <li class="list-group-item">High-quality materials</li>
+                                            <li class="list-group-item">Durable construction</li>
+                                            <li class="list-group-item">Modern design</li>
+                                            <li class="list-group-item">1-year warranty</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /tab2  -->
+                        <!-- tab3 -->
+                        <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                            <div class="p-4">
+                                <div class="row">
+                                    <!-- Reviews -->
+                                    <div class="col-md-6">
+                                        <div id="reviews">
+                                            <h4>@Model.Reviews.Count Review(s)</h4>
+                                            @foreach (var review in Model.Reviews)
+                                            {
+                                                <div class="review mb-4 pb-4 border-bottom">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="review-rating me-3">
+                                                            @for (int i = 0; i < review.Rating; i++)
+                                                            {
+                                                                <i class="fa fa-star text-warning"></i>
+                                                            }
+                                                            @for (int i = review.Rating; i < 5; i++)
+                                                            {
+                                                                <i class="fa fa-star-o text-warning"></i>
+                                                            }
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0">@review.UserName</h6>
+                                                            <small class="text-muted">@review.Date.ToString("dd MMM yyyy")</small>
+                                                        </div>
+                                                    </div>
+                                                    <p>@review.Comment</p>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <!-- /Reviews -->
+                                    <!-- Review Form -->
+                                    <div class="col-md-6">
+                                        <div id="review-form">
+                                            <h4>Write Your Review</h4>
+                                            <form asp-controller="Home" asp-action="SubmitReview" method="post" class="review-form">
+                                                <input type="hidden" name="productId" value="@Model.ProductId" />
+                                                <div class="mb-3">
+                                                    <label for="rating" class="form-label">Rating</label>
+                                                    <div class="rating-input d-flex">
+                                                        @for (int i = 5; i >= 1; i--)
+                                                        {
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input" type="radio" name="rating" id="rating@i" value="@i" required>
+                                                                <label class="form-check-label" for="rating@i">@i <i class="fa fa-star text-warning"></i></label>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="comment" class="form-label">Your Review</label>
+                                                    <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- /Review Form -->
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /tab3 -->
+                    </div>
+                    <!-- /product tab content  -->
+                </div>
+            </div>
+            <!-- /product tab -->
+        </div>
 
-						<div class="product-options">
-							<label>
-								Size
-								<select class="input-select">
-									<option value="0">X</option>
-								</select>
-							</label>
-							<label>
-								Color
-								<select class="input-select">
-									<option value="0">Red</option>
-								</select>
-							</label>
-						</div>
+        <!-- Related Products -->
+        <div class="section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="section-title text-center">
+                            <h3 class="title">Related Products</h3>
+                        </div>
+                    </div>
 
-						<div class="add-to-cart">
-							<div class="qty-label">
-								Qty
-								<div class="input-number">
-									<input type="number">
-									<span class="qty-up">+</span>
-									<span class="qty-down">-</span>
-								</div>
-							</div>
-							<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-						</div>
+                    @if (Model.RelatedProducts != null)
+                    {
+                        @foreach (var item in Model.RelatedProducts)
+                        {
+                            <div class="col-md-3 col-xs-6">
+                                <div class="product">
+                                    <div class="product-img">
+                                        <img src="@(string.IsNullOrEmpty(item.ImagePath) ? "/images/default-placeholder.png" : item.ImagePath)" alt="@item.Name">
+                                        @if (item.IsOnSale)
+                                        {
+                                            <div class="product-label">
+                                                <span class="sale">SALE</span>
+                                            </div>
+                                        }
+                                        else if (item.IsNew)
+                                        {
+                                            <div class="product-label">
+                                                <span class="new">NEW</span>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="product-body">
+                                        <p class="product-category">@item.CategoryName</p>
+                                        <h3 class="product-name"><a href="/Home/Details/@item.ProductId">@item.Name</a></h3>
+                                        <h4 class="product-price">
+                                            $@item.Price.ToString("F2")
+                                            @if (item.OriginalPrice.HasValue)
+                                            {
+                                                <del class="product-old-price">$@item.OriginalPrice.Value.ToString("F2")</del>
+                                            }
+                                        </h4>
+                                        <div class="product-rating">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star-o"></i>
+                                        </div>
+                                        <div class="product-btns">
+                                            <button class="add-to-wishlist" onclick="addToWishlist(@item.ProductId)"><i class="fa fa-heart-o"></i><span class="tooltipp">Add to wishlist</span></button>
+                                            <button class="add-to-compare" onclick="addToCompare(@item.ProductId)"><i class="fa fa-exchange"></i><span class="tooltipp">Compare</span></button>
+                                            <button class="quick-view" onclick="quickView(@item.ProductId)"><i class="fa fa-eye"></i><span class="tooltipp">Quick view</span></button>
+                                        </div>
+                                    </div>
+                                    <div class="add-to-cart">
+                                        <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <input type="hidden" name="quantity" value="1" />
+                                            <button type="submit" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Add to cart</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <!-- /Related Products -->
+    </div>
+</div>
 
-						<ul class="product-btns">
-							<li><a href="#"><i class="fa fa-heart-o"></i> add to wishlist</a></li>
-							<li><a href="#"><i class="fa fa-exchange"></i> add to compare</a></li>
-						</ul>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Quantity buttons
+            document.getElementById('increaseQty').addEventListener('click', function() {
+                var input = document.getElementById('quantity');
+                var value = parseInt(input.value);
+                var max = parseInt(input.getAttribute('max'));
+                if (value < max) {
+                    input.value = value + 1;
+                }
+            });
 
-						<ul class="product-links">
-							<li>Category:</li>
-							<li><a href="#">Headphones</a></li>
-							<li><a href="#">Accessories</a></li>
-						
+            document.getElementById('decreaseQty').addEventListener('click', function() {
+                var input = document.getElementById('quantity');
+                var value = parseInt(input.value);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+            });
+        });
 
-					</div>
-				</div>
-				<!-- /Product details -->
-				<!-- Product tab -->
-				<div class="col-md-12">
-					<div id="product-tab">
-						<!-- product tab nav -->
-						<ul class="tab-nav">
-							<li class="active"><a data-toggle="tab" href="#tab1">Description</a></li>
-							<li><a data-toggle="tab" href="#tab2">Details</a></li>
-							<li><a data-toggle="tab" href="#tab3">Reviews (3)</a></li>
-						</ul>
-						<!-- /product tab nav -->
-						<!-- product tab content -->
-						<div class="tab-content">
-							<!-- tab1  -->
-							<div id="tab1" class="tab-pane fade in active">
-								<div class="row">
-									<div class="col-md-12">
-										<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-									</div>
-								</div>
-							</div>
-							<!-- /tab1  -->
-							<!-- tab2  -->
-							<div id="tab2" class="tab-pane fade in">
-								<div class="row">
-									<div class="col-md-12">
-										<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-									</div>
-								</div>
-							</div>
-							<!-- /tab2  -->
-							<!-- tab3  -->
-							<div id="tab3" class="tab-pane fade in">
-								<div class="row">
-									<!-- Rating -->
-									<div class="col-md-3">
-										<div id="rating">
-											<div class="rating-avg">
-												<span>4.5</span>
-												<div class="rating-stars">
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star-o"></i>
-												</div>
-											</div>
-											<ul class="rating">
-												<li>
-													<div class="rating-stars">
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-													</div>
-													<div class="rating-progress">
-														<div style="width: 80%;"></div>
-													</div>
-													<span class="sum">3</span>
-												</li>
-												<li>
-													<div class="rating-stars">
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star-o"></i>
-													</div>
-													<div class="rating-progress">
-														<div style="width: 60%;"></div>
-													</div>
-													<span class="sum">2</span>
-												</li>
-												<li>
-													<div class="rating-stars">
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star-o"></i>
-														<i class="fa fa-star-o"></i>
-													</div>
-													<div class="rating-progress">
-														<div></div>
-													</div>
-													<span class="sum">0</span>
-												</li>
-												<li>
-													<div class="rating-stars">
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star-o"></i>
-														<i class="fa fa-star-o"></i>
-														<i class="fa fa-star-o"></i>
-													</div>
-													<div class="rating-progress">
-														<div></div>
-													</div>
-													<span class="sum">0</span>
-												</li>
-												<li>
-													<div class="rating-stars">
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star-o"></i>
-														<i class="fa fa-star-o"></i>
-														<i class="fa fa-star-o"></i>
-														<i class="fa fa-star-o"></i>
-													</div>
-													<div class="rating-progress">
-														<div></div>
-													</div>
-													<span class="sum">0</span>
-												</li>
-											</ul>
-										</div>
-									</div>
-									<!-- /Rating -->
-									<!-- Reviews -->
-									<div class="col-md-6">
-										<div id="reviews">
-											<ul class="reviews">
-												<li>
-													<div class="review-heading">
-														<h5 class="name">John</h5>
-														<p class="date">27 DEC 2018, 8:0 PM</p>
-														<div class="review-rating">
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star-o empty"></i>
-														</div>
-													</div>
-													<div class="review-body">
-														<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</p>
-													</div>
-												</li>
-												<li>
-													<div class="review-heading">
-														<h5 class="name">John</h5>
-														<p class="date">27 DEC 2018, 8:0 PM</p>
-														<div class="review-rating">
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star-o empty"></i>
-														</div>
-													</div>
-													<div class="review-body">
-														<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</p>
-													</div>
-												</li>
-												<li>
-													<div class="review-heading">
-														<h5 class="name">John</h5>
-														<p class="date">27 DEC 2018, 8:0 PM</p>
-														<div class="review-rating">
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star-o empty"></i>
-														</div>
-													</div>
-													<div class="review-body">
-														<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</p>
-													</div>
-												</li>
-											</ul>
-											<ul class="reviews-pagination">
-												<li class="active">1</li>
-												<li><a href="#">2</a></li>
-												<li><a href="#">3</a></li>
-												<li><a href="#">4</a></li>
-												<li><a href="#"><i class="fa fa-angle-right"></i></a></li>
-											</ul>
-										</div>
-									</div>
-									<!-- /Reviews -->
-									<!-- Review Form -->
-									<div class="col-md-3">
-										<div id="review-form">
-											<form class="review-form">
-												<input class="input" type="text" placeholder="Your Name">
-												<input class="input" type="email" placeholder="Your Email">
-												<textarea class="input" placeholder="Your Review"></textarea>
-												<div class="input-rating">
-													<span>Your Rating: </span>
-													<div class="stars">
-														<input id="star5" name="rating" value="5" type="radio"><label for="star5"></label>
-														<input id="star4" name="rating" value="4" type="radio"><label for="star4"></label>
-														<input id="star3" name="rating" value="3" type="radio"><label for="star3"></label>
-														<input id="star2" name="rating" value="2" type="radio"><label for="star2"></label>
-														<input id="star1" name="rating" value="1" type="radio"><label for="star1"></label>
-													</div>
-												</div>
-												<button class="primary-btn">Submit</button>
-											</form>
-										</div>
-									</div>
-									<!-- /Review Form -->
-								</div>
-							</div>
-							<!-- /tab3  -->
-						</div>
-						<!-- /product tab content  -->
-					</div>
-				</div>
-				<!-- /product tab -->
-			</div>
-			<!-- /row -->
-		</div>
-		<!-- /container -->
-	</div>
-	
-	
-	
-	<!-- jQuery Plugins -->
-	<script src="js/jquery.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<script src="js/slick.min.js"></script>
-	<script src="js/nouislider.min.js"></script>
-	<script src="js/jquery.zoom.min.js"></script>
-	<script src="js/main.js"></script>
+        // Global functions for product interactions
+        function addToWishlist(productId) {
+            fetch('/Wishlist/AddToWishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'productId=' + productId
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Product added to wishlist!', 'success');
+                } else if (response.status === 401) {
+                    window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                } else {
+                    throw new Error('Failed to add to wishlist');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to add to wishlist. Please try again.', 'error');
+            });
+        }
 
-</body>
-</html>
+        function addToCompare(productId) {
+            fetch('/Compare/AddToCompare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'productId=' + productId
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Product added to compare list!', 'success');
+                } else {
+                    throw new Error('Failed to add to compare list');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to add to compare list. Please try again.', 'error');
+            });
+        }
+
+        function quickView(productId) {
+            fetch(`/Home/QuickView?productId=${productId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.getElementById('quickViewContent').innerHTML = html;
+                    var quickViewModal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+                    quickViewModal.show();
+                })
+                .catch(error => {
+                    console.error('Error loading quick view:', error);
+                    showNotification('Failed to load product quick view. Please try again.', 'error');
+                });
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = 'notification ' + type;
+            notification.innerHTML = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+            .notification.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .notification.success {
+                border-left: 4px solid #28a745;
+            }
+
+            .notification.error {
+                border-left: 4px solid #dc3545;
+            }
+    </style>
+}
+
+

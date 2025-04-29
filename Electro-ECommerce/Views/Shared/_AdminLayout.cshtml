@@ -169,7 +169,7 @@
                     <i class="fas fa-bars"></i>
                 </button>
 
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand" asp-controller="Admin" asp-action="Index">
                     <i class="fas fa-bolt me-2"></i>Electro Admin
                 </a>
 
@@ -182,9 +182,6 @@
                             <span>@User.Identity.Name</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
@@ -199,12 +196,7 @@
 
         <!-- Sidebar -->
         <div id="sidebar">
-            <ul class="nav flex-column px-3">
-                <li class="nav-item mb-2">
-                    <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard
-                    </a>
-                </li>
+            <ul class="nav flex-column px-3"> 
                 <li class="nav-item mb-2">
                     <a class="nav-link" asp-area="Admin" asp-controller="Product" asp-action="Index">
                         <i class="fas fa-box"></i> Products
@@ -214,25 +206,10 @@
                     <a class="nav-link" asp-controller="Categories" asp-action="Index">
                         <i class="fas fa-tags"></i> Categories
                     </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a class="nav-link" asp-controller="Order" asp-action="Index">
-                        <i class="fas fa-shopping-cart"></i> Orders
-                    </a>
-                </li>
+                </li>         
                 <li class="nav-item mb-2">
                     <a class="nav-link" asp-controller="User" asp-action="Index">
                         <i class="fas fa-users"></i> Users
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a class="nav-link" href="#">
-                        <i class="fas fa-chart-bar"></i> Reports
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a class="nav-link" href="#">
-                        <i class="fas fa-cog"></i> Settings
                     </a>
                 </li>
             </ul>

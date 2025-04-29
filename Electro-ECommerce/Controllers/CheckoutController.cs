@@ -9,41 +9,36 @@ using Microsoft.AspNetCore.Authorization;
 using Electro_ECommerce.Models;
 using Electro_ECommerce.ViewModels;
 using Electro_ECommerce.Data;
+using System.Security.Claims;
 
 namespace Electro_ECommerce.Controllers
 {
     [Authorize]
+
     public class CheckoutController : Controller
     {
         private readonly TechXpressDbContext _context;
-        private readonly UserManager<User> _userManager;
 
-        public CheckoutController(TechXpressDbContext context, UserManager<User> userManager)
+        public CheckoutController(TechXpressDbContext context)
         {
             _context = context;
-            _userManager = userManager;
         }
 
+        // GET: Checkout/Index
         public async Task<IActionResult> Index()
         {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            // Get the items in the user's cart
             var cartItems = await _context.ShoppingCarts
-                .Include(c => c.Product)
-                .ThenInclude(p => p.Category)
                 .Where(c => c.UserId == userId)
+                .Include(c => c.Product)
                 .ToListAsync();
 
             if (!cartItems.Any())
             {
-                return RedirectToAction("Cart", "ShoppingCart");
+                return RedirectToAction("Cart", "ShoppingCart"); // Redirect to the ShoppingCart if the cart is empty
             }
-
-            var user = await _userManager.FindByIdAsync(userId);
 
             // Calculate totals
             decimal subtotal = cartItems.Sum(item => item.Product.Price * item.Quantity);
@@ -51,31 +46,31 @@ namespace Electro_ECommerce.Controllers
             decimal shipping = 10.00m; // Fixed shipping cost
             decimal total = subtotal + tax + shipping;
 
-            var checkout = new Checkout
+            // Prepare the checkout view model
+            var checkoutViewModel = new Checkout
             {
                 CartItems = cartItems,
                 Subtotal = subtotal,
                 Tax = tax,
                 Shipping = shipping,
-                Total = total,
-                PhoneNumber = user?.PhoneNumber ?? string.Empty,
-                Address = user?.ShippingAddress ?? string.Empty
+                Total = total
             };
 
-            return View(checkout);
+            return View(checkoutViewModel);
         }
 
+        // POST: Checkout/ProcessCheckout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProcessCheckout(Checkout model)
         {
             if (!ModelState.IsValid)
             {
-                var userId = _userManager.GetUserId(User);
+                // Re-populate cart items if model is invalid
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var cartItems = await _context.ShoppingCarts
+                    .Where(c => c.UserId == currentUserId)
                     .Include(c => c.Product)
-                    .ThenInclude(p => p.Category)
-                    .Where(c => c.UserId == userId)
                     .ToListAsync();
 
                 // Recalculate totals
@@ -93,16 +88,12 @@ namespace Electro_ECommerce.Controllers
                 return View("Index", model);
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             // Get cart items
             var items = await _context.ShoppingCarts
+                .Where(c => c.UserId == userId)
                 .Include(c => c.Product)
-                .Where(c => c.UserId == user.Id)
                 .ToListAsync();
 
             if (!items.Any())
@@ -110,16 +101,16 @@ namespace Electro_ECommerce.Controllers
                 return RedirectToAction("Cart", "ShoppingCart");
             }
 
-            // Calculate totals
+            // Calculate totals for the order
             decimal orderSubtotal = items.Sum(item => item.Product.Price * item.Quantity);
-            decimal orderTax = orderSubtotal * 0.1m; // 10% tax
-            decimal orderShipping = 10.00m; // Fixed shipping cost
+            decimal orderTax = orderSubtotal * 0.1m;
+            decimal orderShipping = 10.00m;
             decimal orderTotal = orderSubtotal + orderTax + orderShipping;
 
-            // Create order
+            // Create the Order
             var order = new Order
             {
-                UserId = user.Id,
+                UserId = userId,
                 OrderDate = DateTime.Now,
                 TotalAmount = orderTotal,
                 Status = "Pending",
@@ -130,7 +121,7 @@ namespace Electro_ECommerce.Controllers
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            // Create order details
+            // Add order details
             foreach (var item in items)
             {
                 var orderDetail = new OrderDetail
@@ -140,19 +131,18 @@ namespace Electro_ECommerce.Controllers
                     Quantity = item.Quantity,
                     UnitPrice = item.Product.Price,
                     Subtotal = item.Product.Price * item.Quantity,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now
                 };
 
                 _context.OrderDetails.Add(orderDetail);
             }
 
-            // Create payment record
+            // Create a payment record
             var payment = new Payment
             {
                 OrderId = order.OrderId,
                 PaymentMethod = model.PaymentMethod,
-                PaymentStatus = "Pending",
+                PaymentStatus = "Completed", // Assuming payment is successful for demo purposes
                 TransactionDate = DateTime.Now,
                 Amount = orderTotal,
                 CreatedAt = DateTime.Now,
@@ -162,28 +152,23 @@ namespace Electro_ECommerce.Controllers
 
             _context.Payments.Add(payment);
 
-            // Update user shipping address if it has changed
-            if (!string.IsNullOrEmpty(model.Address) && model.Address != user.ShippingAddress)
-            {
-                user.ShippingAddress = model.Address;
-                await _userManager.UpdateAsync(user);
-            }
-
-            // Clear the cart
+            // Remove cart items after placing the order
             _context.ShoppingCarts.RemoveRange(items);
 
             await _context.SaveChangesAsync();
 
+            // Redirect to the order confirmation page
             return RedirectToAction("OrderConfirmation", new { orderId = order.OrderId });
         }
 
+        // GET: Checkout/OrderConfirmation/5
         public async Task<IActionResult> OrderConfirmation(int orderId)
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)
-                .Include(o => o.User)
+                .Include(o => o.Payments)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId && o.UserId == userId);
 
             if (order == null)

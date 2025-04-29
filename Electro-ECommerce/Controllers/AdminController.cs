@@ -342,5 +342,59 @@ namespace Electro_ECommerce.Controllers
             return _context.Categories.Any(e => e.CategoryId == id);
         }
         #endregion
+
+        #region Order Management
+        // GET: Admin/Orders
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Orders()
+        {
+            var orders = await _context.Orders
+                .Include(o => o.User)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
+        // GET: Admin/OrderDetails/5
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> OrderDetails(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .Include(o => o.User)
+                .Include(o => o.Payments)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View("OrderDetails", order); // uses Views/Admin/OrderDetails.cshtml
+        }
+
+        // POST: Admin/UpdateOrderStatus
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            order.Status = status;
+            order.UpdatedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Order status updated successfully.";
+            return RedirectToAction(nameof(OrderDetails), new { id = orderId });
+        }
+        #endregion
     }
 }

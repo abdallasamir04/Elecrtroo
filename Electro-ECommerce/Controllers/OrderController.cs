@@ -28,7 +28,6 @@ public class OrderController : Controller
         return View(orders);
     }
 
-
     // GET: /Order/Details/5
     public async Task<IActionResult> Details(int id)
     {
@@ -44,52 +43,85 @@ public class OrderController : Controller
         return View(order);
     }
 
+    // GET: /Order/Cancel/5
+    [HttpGet]
+    public async Task<IActionResult> Cancel(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var order = await _context.Orders
+            .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
+
+        if (order == null)
+            return NotFound();
+
+        // Optional: Prevent cancelling if already cancelled or shipped
+        if (order.Status == "Cancelled" || order.Status == "Shipped")
+        {
+            return RedirectToAction("Details", new { id });
+        }
+
+        return View(order); // Return Cancel.cshtml view
+    }
+
+    // POST: /Order/ConfirmCancel
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmCancel(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var order = await _context.Orders
+            .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
+
+        if (order == null)
+            return NotFound();
+
+        if (order.Status == "Cancelled" || order.Status == "Shipped")
+        {
+            return RedirectToAction("Details", new { id });
+        }
+
+        order.Status = "Cancelled";
+        order.UpdatedAt = DateTime.Now;
+
+        _context.Orders.Update(order);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("Details", new { id });
+    }
+
+    // POST: /Order/PlaceOrder
     public async Task<IActionResult> PlaceOrder()
     {
-        // Get the current logged-in user
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Get the items in the user's cart, including the Product data
         var cartItems = await _context.ShoppingCarts
             .Where(c => c.UserId == userId)
-            .Include(c => c.Product) // Ensure Product is loaded
+            .Include(c => c.Product)
             .ToListAsync();
 
         if (!cartItems.Any())
         {
-            return RedirectToAction("Index", "Home"); // Redirect to the home page if the cart is empty
+            return RedirectToAction("Index", "Home");
         }
 
-        // Calculate the total amount for the order
         decimal totalAmount = 0;
-
-        // Check if each cart item has a valid Product object
         foreach (var item in cartItems)
         {
-            if (item.Product == null) // Check if Product is null
-            {
-                // You can log or handle the case where the product is missing
-                // Optionally, you can also remove this cart item if the Product is missing
-                continue; // Skip this item if Product is null
-            }
-
-            // If Product is valid, calculate totalAmount
+            if (item.Product == null) continue;
             totalAmount += item.Product.Price * item.Quantity;
         }
 
-        // If totalAmount is 0 (because all products in the cart were invalid), return an error or redirect
         if (totalAmount == 0)
         {
-            return RedirectToAction("Index", "Home"); // Or return a custom error message
+            return RedirectToAction("Index", "Home");
         }
 
-        // Create a new Order
         var order = new Order
         {
             UserId = userId,
             OrderDate = DateTime.Now,
             TotalAmount = totalAmount,
-            Status = "Pending", // Set an initial order status (e.g., "Pending", "Paid", etc.)
+            Status = "Pending",
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now
         };
@@ -97,10 +129,9 @@ public class OrderController : Controller
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
 
-        // Add each cart item as OrderDetail
         foreach (var cartItem in cartItems)
         {
-            if (cartItem.Product == null) continue; // Skip if no product is associated with the cart item
+            if (cartItem.Product == null) continue;
 
             var orderDetail = new OrderDetail
             {
@@ -115,15 +146,9 @@ public class OrderController : Controller
             _context.OrderDetails.Add(orderDetail);
         }
 
-        // Remove cart items after the order is placed
         _context.ShoppingCarts.RemoveRange(cartItems);
         await _context.SaveChangesAsync();
 
-        // Redirect to the 'My Orders' page
         return RedirectToAction("Index", "Order");
     }
-
-
-
-
 }

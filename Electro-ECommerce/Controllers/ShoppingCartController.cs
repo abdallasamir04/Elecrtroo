@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Electro_ECommerce.Models;
+using Electro_ECommerce.ViewModels;
 using Electro_ECommerce.Data;
 
 namespace Electro_ECommerce.Controllers
@@ -27,7 +28,8 @@ namespace Electro_ECommerce.Controllers
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
             {
-                return RedirectToAction("Login", "Account");
+                // Handle anonymous cart (could be stored in session or cookies)
+                return View(new List<ShoppingCart>());
             }
 
             var cartItems = await _context.ShoppingCarts
@@ -42,19 +44,31 @@ namespace Electro_ECommerce.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToAction("Login", "Account", new { returnUrl = Request.Headers["Referer"].ToString() });
-            }
-
             var product = await _context.Products.FindAsync(productId);
             if (product == null)
             {
                 return NotFound();
             }
 
-            // Check if product is already in cart
+            // Check if product is in stock
+            if (product.StockQuantity < quantity)
+            {
+                TempData["ErrorMessage"] = "Not enough stock available.";
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return BadRequest(new { success = false, message = "Not enough stock available." });
+                }
+                return RedirectToAction("Details", "Home", new { id = productId });
+            }
+
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                // Redirect to login with return URL
+                return RedirectToAction("Login", "Account", new { returnUrl = Request.Headers["Referer"].ToString() });
+            }
+
+            // Check if item already exists in cart
             var cartItem = await _context.ShoppingCarts
                 .FirstOrDefaultAsync(c => c.UserId == userId && c.ProductId == productId);
 
@@ -63,6 +77,7 @@ namespace Electro_ECommerce.Controllers
                 // Update existing cart item
                 cartItem.Quantity += quantity;
                 cartItem.UpdatedAt = DateTime.Now;
+                _context.ShoppingCarts.Update(cartItem);
             }
             else
             {
@@ -80,13 +95,13 @@ namespace Electro_ECommerce.Controllers
 
             await _context.SaveChangesAsync();
 
-            // If it's an AJAX request, return JSON
+            TempData["SuccessMessage"] = "Product added to cart!";
+
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                return Json(new { success = true, message = "Product added to cart" });
+                return Ok(new { success = true, message = "Product added to cart!" });
             }
 
-            // Otherwise redirect to cart page
             return RedirectToAction(nameof(Cart));
         }
 
@@ -100,6 +115,7 @@ namespace Electro_ECommerce.Controllers
             }
 
             var cartItem = await _context.ShoppingCarts
+                .Include(c => c.Product)
                 .FirstOrDefaultAsync(c => c.CartId == cartId && c.UserId == userId);
 
             if (cartItem == null)
@@ -113,18 +129,19 @@ namespace Electro_ECommerce.Controllers
             }
             else
             {
+                // Check if requested quantity is available
+                if (quantity > cartItem.Product.StockQuantity)
+                {
+                    TempData["ErrorMessage"] = "Not enough stock available.";
+                    return RedirectToAction(nameof(Cart));
+                }
+
                 cartItem.Quantity = quantity;
                 cartItem.UpdatedAt = DateTime.Now;
+                _context.ShoppingCarts.Update(cartItem);
             }
 
             await _context.SaveChangesAsync();
-
-            // If it's an AJAX request, return JSON
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return Json(new { success = true });
-            }
-
             return RedirectToAction(nameof(Cart));
         }
 
@@ -148,12 +165,7 @@ namespace Electro_ECommerce.Controllers
             _context.ShoppingCarts.Remove(cartItem);
             await _context.SaveChangesAsync();
 
-            // If it's an AJAX request, return JSON
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return Json(new { success = true });
-            }
-
+            TempData["SuccessMessage"] = "Item removed from cart!";
             return RedirectToAction(nameof(Cart));
         }
 
@@ -173,12 +185,7 @@ namespace Electro_ECommerce.Controllers
             _context.ShoppingCarts.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
 
-            // If it's an AJAX request, return JSON
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return Json(new { success = true });
-            }
-
+            TempData["SuccessMessage"] = "Cart cleared!";
             return RedirectToAction(nameof(Cart));
         }
     }

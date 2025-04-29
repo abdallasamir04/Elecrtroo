@@ -15,7 +15,6 @@ else
     <table class="table table-bordered mt-3">
         <thead class="table-dark">
             <tr>
-                <th>Order ID</th>
                 <th>Date</th>
                 <th>Total</th>
                 <th>Status</th>
@@ -26,7 +25,6 @@ else
             @foreach (var order in Model)
             {
                 <tr>
-                    <td>@order.OrderId</td>
                     <td>@order.OrderDate?.ToString("dd MMM yyyy")</td> <!-- Improved date format -->
                     <td>@order.TotalAmount.ToString("C")</td>
                     <td>@order.Status</td>
