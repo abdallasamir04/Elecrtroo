@@ -1,0 +1,67 @@
+﻿@model IEnumerable<Electro_ECommerce.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Style {
+    <style>
+        .product-widget {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+            .product-widget h3 {
+                font-size: 1.2em;
+                margin-bottom: 5px;
+            }
+
+            .product-widget p {
+                font-size: 0.9em;
+                color: #777;
+            }
+    </style>
+}
+
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> Create New</a>
+    </p>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+                <div class="product-widget">
+                    <h3>@Html.DisplayFor(modelItem => item.Name)</h3>
+                    <p>Price: @Html.DisplayFor(modelItem => item.Price)</p>
+                    <p>Stock: @Html.DisplayFor(modelItem => item.StockQuantity)</p>
+                    <p>
+                        Category:
+                        @if (item.Category != null)
+                        {
+                            @Html.DisplayFor(modelItem => item.Category.Name)
+                        }
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+                    </p>
+                    <a asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-warning btn-sm"><i class="fa fa-pencil"></i> Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</a>
+                </div>
+            </div>
+        }
+    </div>
+
+
+
+</div>

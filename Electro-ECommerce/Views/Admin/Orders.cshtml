@@ -1,0 +1,94 @@
+﻿@model IEnumerable<Electro_ECommerce.Models.Order>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>#@order.OrderId</td>
+                <td>@(order.User?.UserName ?? "Unknown")</td>
+                <td>
+                    @(order.OrderDate.HasValue
+                        ? order.OrderDate.Value.ToString("dd MMM yyyy")
+                        : "N/A")
+                </td>
+                <td>@order.TotalAmount.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
+                <td>
+                    <span class="badge @GetStatusBadgeClass(order.Status)">
+                        @order.Status
+                    </span>
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-primary" asp-action="OrderDetails" asp-route-id="@order.OrderId">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "completed" => "bg-success",           // Green
+            "processing" => "bg-primary",          // Blue
+            "pending" => "bg-info",                // Light blue
+            "shipped" => "bg-indigo",              // Indigo
+            "delivered" => "bg-teal",              // Teal
+            "cancelled" => "bg-danger",            // Red
+            "refunded" => "bg-pink",               // Pink
+            "on hold" => "bg-warning",             // Yellow
+            "backordered" => "bg-orange",          // Orange
+            "failed" => "bg-dark",                 // Dark gray
+            "returned" => "bg-secondary",          // Gray
+            "awaiting payment" => "bg-purple",     // Purple
+            _ => "bg-light text-dark"              // Light gray with dark text for any other status
+        };
+    }
+}
+
+<style>
+    /* Custom badge colors that aren't in Bootstrap by default */
+    .bg-indigo {
+        background-color: #6610f2 !important;
+        color: white;
+    }
+
+    .bg-teal {
+        background-color: #20c997 !important;
+        color: white;
+    }
+
+    .bg-orange {
+        background-color: #fd7e14 !important;
+        color: white;
+    }
+
+    .bg-pink {
+        background-color: #e83e8c !important;
+        color: white;
+    }
+
+    .bg-purple {
+        background-color: #6f42c1 !important;
+        color: white;
+    }
+
+    /* Make badges more visible */
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+    }
+</style>

@@ -1,0 +1,304 @@
+﻿@model Electro_ECommerce.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_AccountLayout";
+}
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, var(--bs-primary) 0%, #4e54c8 100%);
+    }
+
+    .password-container {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        z-index: 10;
+    }
+
+        .password-toggle:hover {
+            color: var(--bs-primary);
+        }
+
+    .social-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all 0.3s;
+    }
+
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+    .form-control:focus {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+    }
+
+    .btn-primary {
+        transition: all 0.3s;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(var(--bs-primary-rgb), 0.4);
+        }
+
+    .password-strength {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100 py-5">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-lg overflow-hidden">
+                <div class="card-header bg-gradient-primary text-white text-center py-4">
+                    <h3 class="mb-0 fw-bold">
+                        <i class="fas fa-bolt me-2"></i>Electro
+                    </h3>
+                    <p class="mt-2 mb-0 opacity-75">Join our community today</p>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Register" method="post" id="registerForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 alert alert-danger py-2"></div>
+
+                        <div class="progress mb-4" style="height: 6px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 0%;" id="formProgress"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Name" class="form-control form-control-lg" placeholder="Full Name" />
+                                    <label asp-for="Name"><i class="fas fa-user me-2 text-muted"></i>Full Name</label>
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="UserName" class="form-control form-control-lg" placeholder="Username" />
+                                    <label asp-for="UserName"><i class="fas fa-at me-2 text-muted"></i>Username</label>
+                                    <span asp-validation-for="UserName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control form-control-lg" placeholder="name@example.com" autocomplete="email" />
+                            <label asp-for="Email"><i class="fas fa-envelope me-2 text-muted"></i>Email</label>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3 password-container">
+                            <input asp-for="Password" class="form-control form-control-lg" type="password" placeholder="Password" id="password" />
+                            <label asp-for="Password"><i class="fas fa-lock me-2 text-muted"></i>Password</label>
+                            <span class="password-toggle" onclick="togglePassword(this)">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="password-strength mb-3 d-none" id="passwordStrength">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Password strength:</span>
+                                <span id="strengthText">Weak</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 0%;" id="strengthBar"></div>
+                            </div>
+                            <div class="mt-2 small text-muted">
+                                <ul class="ps-3 mb-0">
+                                    <li>At least 8 characters</li>
+                                    <li>Include uppercase & lowercase letters</li>
+                                    <li>Include at least one number</li>
+                                    <li>Include at least one special character</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3 password-container">
+                            <input asp-for="ConfirmPassword" class="form-control form-control-lg" type="password" placeholder="Confirm Password" />
+                            <label asp-for="ConfirmPassword"><i class="fas fa-lock me-2 text-muted"></i>Confirm Password</label>
+                            <span class="password-toggle" onclick="togglePassword(this)">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="PhoneNumber" class="form-control form-control-lg" placeholder="Phone Number" />
+                            <label asp-for="PhoneNumber"><i class="fas fa-phone me-2 text-muted"></i>Phone Number (Optional)</label>
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="termsCheck" required />
+                            <label class="form-check-label" for="termsCheck">
+                                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </button>
+                        </div>
+
+                        <div class="text-center my-4 position-relative">
+                            <hr class="text-muted">
+                            <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white text-muted">or sign up with</span>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <a href="#" class="btn btn-outline-secondary social-btn">
+                                <i class="fab fa-google"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-secondary social-btn">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-secondary social-btn">
+                                <i class="fab fa-apple"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3 bg-light">
+                    <div class="small">
+                        <a asp-action="Login" class="text-decoration-none fw-bold">
+                            <i class="fas fa-sign-in-alt me-1"></i> Already have an account? Sign in!
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4 text-muted small">
+                <p>&copy; @DateTime.Now.Year Electro. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword(element) {
+            const passwordInput = element.previousElementSibling.previousElementSibling;
+            const icon = element.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Password strength meter
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            const strengthContainer = document.getElementById('passwordStrength');
+            const formProgress = document.getElementById('formProgress');
+            const form = document.getElementById('registerForm');
+
+            if (passwordInput) {
+                passwordInput.addEventListener('focus', function() {
+                    strengthContainer.classList.remove('d-none');
+                });
+
+                passwordInput.addEventListener('input', function() {
+                    const value = passwordInput.value;
+                    let strength = 0;
+
+                    if (value.length >= 8) strength += 25;
+                    if (value.match(/[A-Z]/)) strength += 25;
+                    if (value.match(/[0-9]/)) strength += 25;
+                    if (value.match(/[^A-Za-z0-9]/)) strength += 25;
+
+                    strengthBar.style.width = strength + '%';
+
+                    if (strength <= 25) {
+                        strengthBar.className = 'progress-bar bg-danger';
+                        strengthText.textContent = 'Weak';
+                        strengthText.className = 'text-danger';
+                    } else if (strength <= 50) {
+                        strengthBar.className = 'progress-bar bg-warning';
+                        strengthText.textContent = 'Fair';
+                        strengthText.className = 'text-warning';
+                    } else if (strength <= 75) {
+                        strengthBar.className = 'progress-bar bg-info';
+                        strengthText.textContent = 'Good';
+                        strengthText.className = 'text-info';
+                    } else {
+                        strengthBar.className = 'progress-bar bg-success';
+                        strengthText.textContent = 'Strong';
+                        strengthText.className = 'text-success';
+                    }
+                });
+            }
+
+            // Form progress
+            if (form) {
+                const inputs = form.querySelectorAll('input:not([type="checkbox"])');
+
+                inputs.forEach(input => {
+                    input.addEventListener('input', updateProgress);
+                });
+
+                function updateProgress() {
+                    let filledInputs = 0;
+                    inputs.forEach(input => {
+                        if (input.value.trim() !== '') {
+                            filledInputs++;
+                        }
+                    });
+
+                    const progress = (filledInputs / inputs.length) * 100;
+                    formProgress.style.width = progress + '%';
+                }
+
+                // Initial progress calculation
+                updateProgress();
+            }
+
+            // Add animation to the card when the page loads
+            const card = document.querySelector('.card');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+}

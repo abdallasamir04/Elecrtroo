@@ -1,0 +1,47 @@
+﻿@model Electro_ECommerce.Models.Order
+@{
+    ViewData["Title"] = "Cancel Order";
+}
+
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/Order">My Orders</a></li>
+                        <li class="breadcrumb-item"><a href="/Order/Details/@Model.OrderId">Order #@Model.OrderId</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Cancel Order</li>
+                    </ol>
+                </nav>
+                <h1 class="h2 mb-4">Cancel Order #@Model.OrderId</h1>
+            </div>
+
+            <div class="col-md-8 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center p-5">
+                        <div class="mb-4">
+                            <i class="fas fa-exclamation-triangle fa-4x text-warning"></i>
+                        </div>
+                        <h2 class="mb-3">Are you sure you want to cancel this order?</h2>
+                        <p class="text-muted mb-4">
+                            This action cannot be undone. Once cancelled, you will need to place a new order if you change your mind.
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="@Url.Action("Details", new { id = Model.OrderId })" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i> No, Go Back
+                            </a>
+                            <form asp-action="ConfirmCancel" method="post">
+                                <input type="hidden" name="id" value="@Model.OrderId" />
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-times me-2"></i> Yes, Cancel Order
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
