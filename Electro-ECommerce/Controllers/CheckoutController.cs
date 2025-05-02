@@ -1,20 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Electro_ECommerce.Data;
 using Electro_ECommerce.Models;
 using Electro_ECommerce.ViewModels;
-using Electro_ECommerce.Data;
-using System.Security.Claims;
+using Stripe.Checkout;
 
 namespace Electro_ECommerce.Controllers
 {
     [Authorize]
-    [Route("Checkout")] // Explicitly set the base route for the controller
+    [Route("Checkout")]
     public class CheckoutController : Controller
     {
         private readonly TechXpressDbContext _context;
@@ -25,29 +24,23 @@ namespace Electro_ECommerce.Controllers
         }
 
         // GET: Checkout/Index
-        [HttpGet("Index")] // Explicit route for the Index action
+        [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            // Get the items in the user's cart
             var cartItems = await _context.ShoppingCarts
                 .Where(c => c.UserId == userId)
                 .Include(c => c.Product)
                 .ToListAsync();
 
             if (!cartItems.Any())
-            {
-                return RedirectToAction("Cart", "ShoppingCart"); // Redirect to the ShoppingCart if the cart is empty
-            }
+                return RedirectToAction("Cart", "ShoppingCart");
 
-            // Calculate totals
             decimal subtotal = cartItems.Sum(item => item.Product.Price * item.Quantity);
-            decimal tax = subtotal * 0.1m; // 10% tax
-            decimal shipping = 10.00m; // Fixed shipping cost
+            decimal tax = subtotal * 0.1m;
+            decimal shipping = 10.00m;
             decimal total = subtotal + tax + shipping;
 
-            // Prepare the checkout view model
             var checkoutViewModel = new Checkout
             {
                 CartItems = cartItems,
@@ -61,54 +54,25 @@ namespace Electro_ECommerce.Controllers
         }
 
         // POST: Checkout/ProcessCheckout
-        [HttpPost("ProcessCheckout")] // Explicit route for the POST action
+        [HttpPost("ProcessCheckout")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProcessCheckout(Checkout model)
         {
-            if (!ModelState.IsValid)
-            {
-                // Re-populate cart items if model is invalid
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var cartItems = await _context.ShoppingCarts
-                    .Where(c => c.UserId == currentUserId)
-                    .Include(c => c.Product)
-                    .ToListAsync();
-
-                // Recalculate totals
-                decimal subtotal = cartItems.Sum(item => item.Product.Price * item.Quantity);
-                decimal tax = subtotal * 0.1m; // 10% tax
-                decimal shipping = 10.00m; // Fixed shipping cost
-                decimal total = subtotal + tax + shipping;
-
-                model.CartItems = cartItems;
-                model.Subtotal = subtotal;
-                model.Tax = tax;
-                model.Shipping = shipping;
-                model.Total = total;
-
-                return View("Index", model);
-            }
-
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            // Get cart items
             var items = await _context.ShoppingCarts
                 .Where(c => c.UserId == userId)
                 .Include(c => c.Product)
                 .ToListAsync();
 
             if (!items.Any())
-            {
                 return RedirectToAction("Cart", "ShoppingCart");
-            }
 
-            // Calculate totals for the order
             decimal orderSubtotal = items.Sum(item => item.Product.Price * item.Quantity);
             decimal orderTax = orderSubtotal * 0.1m;
             decimal orderShipping = 10.00m;
             decimal orderTotal = orderSubtotal + orderTax + orderShipping;
 
-            // Create the Order
+            // Step 1: Create a new order (still pending)
             var order = new Order
             {
                 UserId = userId,
@@ -122,7 +86,6 @@ namespace Electro_ECommerce.Controllers
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            // Add order details
             foreach (var item in items)
             {
                 var orderDetail = new OrderDetail
@@ -134,36 +97,85 @@ namespace Electro_ECommerce.Controllers
                     Subtotal = item.Product.Price * item.Quantity,
                     CreatedAt = DateTime.Now
                 };
-
                 _context.OrderDetails.Add(orderDetail);
             }
 
-            // Create a payment record
+            await _context.SaveChangesAsync();
+
+            // Step 2: Redirect to Stripe Checkout
+            var domain = "https://localhost:7243"; // Replace with your live domain
+
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = items.Select(item => new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        UnitAmount = (long)(item.Product.Price * 100),
+                        Currency = "usd",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = item.Product.Name
+                        }
+                    },
+                    Quantity = item.Quantity
+                }).ToList(),
+                Mode = "payment",
+                SuccessUrl = $"{domain}/Checkout/PaymentSuccess?orderId={order.OrderId}",
+                CancelUrl = $"{domain}/Checkout/Index"
+            };
+
+            var service = new SessionService();
+            Session session = service.Create(options);
+
+            Response.Headers.Add("Location", session.Url);
+            return new StatusCodeResult(303); // Redirect to Stripe Checkout
+        }
+
+        // GET: Checkout/PaymentSuccess?orderId=123
+        [HttpGet("PaymentSuccess")]
+        public async Task<IActionResult> PaymentSuccess(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if (order == null)
+                return NotFound();
+
+            // Create Payment record after Stripe success
             var payment = new Payment
             {
                 OrderId = order.OrderId,
-                PaymentMethod = model.PaymentMethod,
-                PaymentStatus = "Completed", // Assuming payment is successful for demo purposes
+                PaymentMethod = "Stripe",
+                PaymentStatus = "Completed",
                 TransactionDate = DateTime.Now,
-                Amount = orderTotal,
+                Amount = order.TotalAmount,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
-                TransactionId = Guid.NewGuid().ToString() // Generate a unique transaction ID
+                TransactionId = Guid.NewGuid().ToString() // In real app, fetch from Stripe webhook
             };
 
             _context.Payments.Add(payment);
 
-            // Remove cart items after placing the order
-            _context.ShoppingCarts.RemoveRange(items);
+            // Clear cart after successful payment
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var cartItems = _context.ShoppingCarts.Where(c => c.UserId == userId);
+            _context.ShoppingCarts.RemoveRange(cartItems);
+
+            // Update order status
+            order.Status = "Confirmed";
+            order.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
 
-            // Redirect to the order confirmation page
             return RedirectToAction("OrderConfirmation", new { orderId = order.OrderId });
         }
 
         // GET: Checkout/OrderConfirmation/5
-        [HttpGet("OrderConfirmation/{orderId}")] // Explicit route for OrderConfirmation
+        [HttpGet("OrderConfirmation/{orderId}")]
         public async Task<IActionResult> OrderConfirmation(int orderId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -174,9 +186,7 @@ namespace Electro_ECommerce.Controllers
                 .FirstOrDefaultAsync(o => o.OrderId == orderId && o.UserId == userId);
 
             if (order == null)
-            {
                 return NotFound();
-            }
 
             return View(order);
         }

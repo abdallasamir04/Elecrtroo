@@ -6,6 +6,7 @@ using Electro_ECommerce.Repositories;
 using Electro_ECommerce.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Stripe;
 
 
 
@@ -57,6 +58,10 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
 
 // Repository registration
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

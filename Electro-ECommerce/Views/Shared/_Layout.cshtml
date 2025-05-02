@@ -108,14 +108,13 @@
                                     <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Register</a>
                                 </div>
                             }
-
-                            <a class="nav-link cart-button position-relative" asp-controller="ShoppingCart" asp-action="Cart">
-                                <i class="fas fa-shopping-cart fs-5"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    3
-                                    <span class="visually-hidden">items in cart</span>
-                                </span>
+                            <a class="nav-link cart-button d-flex align-items-center justify-content-center position-relative"
+                               asp-controller="ShoppingCart" asp-action="Cart"
+                               style="width: 36px; height: 36px; border-radius: 50%; background-color: #f8f9fa; box-shadow: 0 0 3px rgba(0,0,0,0.1);">
+                                <i class="fas fa-shopping-cart fs-6 text-dark"></i>
                             </a>
+
+
                         </div>
                     </div>
                 </div>
