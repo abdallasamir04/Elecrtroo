@@ -37,41 +37,38 @@
             }
         </div>
 
-       <div class="row">
-    <!-- Product main img -->
-    <div class="col-md-5 col-lg-5">
-        <div id="product-main-img">
-            <div class="product-preview">
-                <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/default-placeholder.png" : Model.ImagePath)" alt="@Model.Name" class="img-fluid">
+        <div class="row">
+            <!-- Product main img -->
+            <div class="col-md-5 col-lg-5">
+                <div id="product-main-img">
+                    <div class="product-preview">
+                        <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/default-placeholder.png" : Model.ImagePath)" alt="@Model.Name" class="img-fluid">
+                    </div>
+                </div>
+
+                <!-- Compact action buttons under image -->
+                <div class="mt-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                            <input type="hidden" name="productId" value="@Model.ProductId" />
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="btn btn-sm btn-primary text-nowrap">
+                                <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+                            </button>
+                        </form>
+
+                        <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="addToWishlist(@Model.ProductId)">
+                            <i class="fas fa-heart me-1"></i> Wishlist
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="addToCompare(@Model.ProductId)">
+                            <i class="fas fa-exchange-alt me-1"></i> Compare
+                        </button>
+                    </div>
+                </div>
+                <!-- /Compact action buttons -->
             </div>
-        </div>
-
-        <!-- Compact action buttons under image -->
-        <div class="mt-3">
-            <div class="d-flex flex-wrap gap-2">
-                <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
-                    <input type="hidden" name="productId" value="@Model.ProductId" />
-                    <input type="hidden" name="quantity" value="1" />
-                    <button type="submit" class="btn btn-sm btn-primary text-nowrap">
-                        <i class="fas fa-shopping-cart me-1"></i> Add to Cart
-                    </button>
-                </form>
-
-                <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="addToWishlist(@Model.ProductId)">
-                    <i class="fas fa-heart me-1"></i> Wishlist
-                </button>
-
-                <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" onclick="addToCompare(@Model.ProductId)">
-                    <i class="fas fa-exchange-alt me-1"></i> Compare
-                </button>
-            </div>
-        </div>
-        <!-- /Compact action buttons -->
-    </div>
-    <!-- /Product main img -->
-
-
-
+            <!-- /Product main img -->
             <!-- /Product main img
 
 
@@ -508,5 +505,4 @@
             }
     </style>
 }
-
 
