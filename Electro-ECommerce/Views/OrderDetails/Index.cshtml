@@ -1,0 +1,50 @@
+﻿@model IEnumerable<Electro_ECommerce.Models.OrderDetail>
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<h2>Order Details</h2>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<!-- Search Form -->
+<form method="get" asp-action="Index" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="searchString" class="form-control" placeholder="Search by Product Name" />
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-secondary">Search</button>
+        </div>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Order.OrderId)</td>
+                <td>@Html.DisplayFor(modelItem => item.Product.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
+                <td>@Html.DisplayFor(modelItem => item.UnitPrice)</td>
+                <td>@Html.DisplayFor(modelItem => item.Subtotal)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.OrderDetailId" class="btn btn-warning">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.OrderDetailId" class="btn btn-info">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.OrderDetailId" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

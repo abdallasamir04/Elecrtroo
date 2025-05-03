@@ -1,0 +1,265 @@
+﻿@model IEnumerable<Electro_ECommerce.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Product Management</h2>
+            <p class="text-muted">Manage your product inventory</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add New Product
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card shadow-sm border-0 rounded-lg mb-4">
+        <div class="card-body p-3">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control border-0 bg-light" placeholder="Search products..." />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-2 justify-content-md-end">    
+                        <select id="sortOrder" class="form-select bg-light border-0">
+                            <option value="name">Sort by Name</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="stock">Stock Quantity</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row g-4" id="productsContainer">
+        @foreach (var item in Model)
+        {
+            <div class="col-xl-3 col-lg-4 col-md-6 product-item"
+                 data-name="@item.Name?.ToLower()"
+                 data-price="@item.Price"
+                 data-category="@item.CategoryId">
+                <div class="card h-100 border-0 shadow-sm product-card">
+                    <div class="position-relative">
+                        <!-- Product Image -->
+                        <div class="product-img-container bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            @if (!string.IsNullOrEmpty(item.ImagePath))
+                            {
+                                <img src="@Url.Content(item.ImagePath)" class="img-fluid" alt="@item.Name" style="max-height: 100%; max-width: 100%;" />
+                            }
+                            else
+                            {
+                                <i class="fas fa-box fa-3x text-muted"></i>
+                            }
+                        </div>
+
+                        <!-- Status Badges -->
+                        @if (item.StockQuantity <= 0)
+                        {
+                            <span class="badge bg-danger position-absolute top-0 start-0 m-2">Out of Stock</span>
+                        }
+                        else if (item.StockQuantity < 10)
+                        {
+                            <span class="badge bg-warning position-absolute top-0 start-0 m-2">Low Stock</span>
+                        }
+
+                        <!-- Quick Actions Overlay -->
+                        <div class="product-actions">
+                            <div class="d-flex gap-2 justify-content-center">
+                                <a asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Edit">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                
+                                <a asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-3">
+                        <h5 class="card-title mb-1 text-truncate">@item.Name</h5>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-primary fw-bold">$@item.Price.ToString("0.00")</span>
+                            <span class="text-muted small">Stock: @item.StockQuantity</span>
+                        </div>
+
+                        
+                    </div>
+
+                    <div class="card-footer bg-white p-3 border-top-0">
+                        <div class="d-grid gap-2">
+                            <a asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-pencil-alt me-1"></i>Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- No Results Message -->
+    <div id="noResults" class="text-center py-5 d-none">
+        <div class="empty-state">
+            <i class="fas fa-search fa-4x text-muted mb-3"></i>
+            <h4>No products found</h4>
+            <p class="text-muted">Try adjusting your search or filter criteria</p>
+            <a asp-action="Create" class="btn btn-primary mt-3">
+                <i class="fas fa-plus me-2"></i>Add New Product
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .product-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+
+    .product-actions {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .product-card:hover .product-actions {
+        opacity: 1;
+    }
+
+    .empty-state {
+        padding: 3rem;
+        background-color: #f8f9fa;
+        border-radius: 1rem;
+        display: inline-block;
+    }
+
+    /* Staggered animation for cards */
+    .product-item {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    @@keyframes fadeInUp {
+        to
+
+    {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Staggered animation for product cards
+            const productItems = document.querySelectorAll('.product-item');
+            productItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.05}s`;
+            });
+
+            // Search and filter functionality
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const sortOrder = document.getElementById('sortOrder');
+            const productsContainer = document.getElementById('productsContainer');
+            const noResults = document.getElementById('noResults');
+
+            function filterProducts() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const categoryId = categoryFilter.value;
+                let visibleCount = 0;
+
+                productItems.forEach(item => {
+                    const name = item.dataset.name;
+                    const category = item.dataset.category;
+                    const matchesSearch = name && name.includes(searchTerm);
+                    const matchesCategory = categoryId === '' || category === categoryId;
+
+                    if (matchesSearch && matchesCategory) {
+                        item.classList.remove('d-none');
+                        visibleCount++;
+                    } else {
+                        item.classList.add('d-none');
+                    }
+                });
+
+                // Show/hide no results message
+                if (visibleCount === 0) {
+                    noResults.classList.remove('d-none');
+                } else {
+                    noResults.classList.add('d-none');
+                }
+            }
+
+            function sortProducts() {
+                const value = sortOrder.value;
+                const items = Array.from(productItems);
+
+                items.sort((a, b) => {
+                    switch(value) {
+                        case 'name':
+                            return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+                        case 'price-asc':
+                            return parseFloat(a.dataset.price || 0) - parseFloat(b.dataset.price || 0);
+                        case 'price-desc':
+                            return parseFloat(b.dataset.price || 0) - parseFloat(a.dataset.price || 0);
+                        case 'stock':
+                            const stockA = a.querySelector('.text-muted.small').textContent.replace('Stock: ', '');
+                            const stockB = b.querySelector('.text-muted.small').textContent.replace('Stock: ', '');
+                            return parseInt(stockA || 0) - parseInt(stockB || 0);
+                        default:
+                            return 0;
+                    }
+                });
+
+                // Reorder elements
+                items.forEach(item => {
+                    productsContainer.appendChild(item);
+                });
+            }
+
+            // Event listeners
+            if (searchInput) searchInput.addEventListener('input', filterProducts);
+            if (categoryFilter) categoryFilter.addEventListener('change', filterProducts);
+            if (sortOrder) sortOrder.addEventListener('change', sortProducts);
+        });
+    </script>
+}

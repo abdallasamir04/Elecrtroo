@@ -1,0 +1,663 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Electro Admin</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/modern-theme.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 70px;
+            --header-height: 70px;
+            --sidebar-bg: #1e2a4a;
+            --sidebar-hover: #2c3e67;
+            --primary-color: #4e73df;
+            --primary-color-rgb: 78, 115, 223;
+            --secondary-color: #6c757d;
+            --success-color: #1cc88a;
+            --danger-color: #e74a3b;
+            --warning-color: #f6c23e;
+            --info-color: #36b9cc;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fc;
+        }
+
+        .admin-header {
+            height: var(--header-height);
+            background-color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: left var(--transition-speed) ease;
+        }
+
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            color: white;
+            position: fixed;
+            left: -300px;
+            top: 0;
+            transition: all var(--transition-speed) ease;
+            z-index: 1040;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+            #sidebar::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            #sidebar::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            #sidebar::-webkit-scrollbar-thumb {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-radius: 20px;
+            }
+
+        .sidebar-open #sidebar {
+            left: 0;
+        }
+
+        .sidebar-collapsed #sidebar {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-collapsed .sidebar-text,
+        .sidebar-collapsed .sidebar-heading,
+        .sidebar-collapsed .sidebar-divider,
+        .sidebar-collapsed .sidebar-brand h1 span {
+            display: none;
+        }
+
+        .sidebar-collapsed .nav-link {
+            justify-content: center;
+            padding: 1rem !important;
+        }
+
+            .sidebar-collapsed .nav-link i {
+                margin-right: 0;
+                font-size: 1.1rem;
+            }
+
+        .sidebar-collapsed .sidebar-brand {
+            justify-content: center;
+            padding: 0;
+        }
+
+        .sidebar-open .main-content {
+            margin-left: var(--sidebar-width);
+        }
+
+        .sidebar-open.sidebar-collapsed .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-open .admin-header {
+            left: var(--sidebar-width);
+        }
+
+        .sidebar-open.sidebar-collapsed .admin-header {
+            left: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-brand {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 1.5rem;
+            background-color: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+            .sidebar-brand h1 {
+                font-size: 1.2rem;
+                margin: 0;
+                font-weight: 700;
+                color: white;
+                white-space: nowrap;
+            }
+
+        .sidebar-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            margin: 1rem 0;
+        }
+
+        .sidebar-heading {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0 1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            padding: 0.75rem 1.5rem !important;
+            display: flex !important;
+            align-items: center;
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            white-space: nowrap;
+        }
+
+            .nav-link:hover, .nav-link.active {
+                color: white !important;
+                background-color: var(--sidebar-hover);
+                border-left-color: var(--primary-color);
+            }
+
+            .nav-link i {
+                width: 1.25rem;
+                text-align: center;
+                margin-right: 0.75rem;
+                font-size: 0.85rem;
+                transition: margin var(--transition-speed) ease;
+            }
+
+            .nav-link .badge {
+                margin-left: auto;
+            }
+
+        .main-content {
+            transition: margin-left var(--transition-speed) ease;
+            padding: calc(var(--header-height) + 1.5rem) 1.5rem 1.5rem 1.5rem;
+            min-height: 100vh;
+        }
+
+        .hamburger-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            color: var(--secondary-color);
+            background-color: transparent;
+            border: none;
+        }
+
+            .hamburger-btn:hover {
+                background-color: rgba(0, 0, 0, 0.05);
+                color: var(--primary-color);
+            }
+
+        .collapse-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            border: none;
+        }
+
+            .collapse-btn:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+
+        .sidebar-collapsed .collapse-btn {
+            right: 15px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+
+            .brand-logo i {
+                margin-right: 0.5rem;
+            }
+
+        .user-dropdown .dropdown-toggle::after {
+            display: none;
+        }
+
+        .user-dropdown .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+            .user-dropdown .dropdown-toggle:hover {
+                color: var(--primary-color);
+            }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            .dropdown-item:hover {
+                background-color: #f8f9fc;
+            }
+
+            .dropdown-item i {
+                width: 1rem;
+                text-align: center;
+                margin-right: 0.5rem;
+            }
+
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 992px) {
+            .sidebar-open .main-content
+
+        {
+            margin-left: 0;
+        }
+
+        .sidebar-open .admin-header {
+            left: 0;
+        }
+
+        #sidebar {
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-collapsed #sidebar {
+            width: var(--sidebar-width);
+        }
+
+        .sidebar-collapsed .sidebar-text,
+        .sidebar-collapsed .sidebar-heading,
+        .sidebar-collapsed .sidebar-divider,
+        .sidebar-collapsed .sidebar-brand h1 span {
+            display: block;
+        }
+
+        .sidebar-collapsed .nav-link {
+            justify-content: flex-start;
+            padding: 0.75rem 1.5rem !important;
+        }
+
+            .sidebar-collapsed .nav-link i {
+                margin-right: 0.75rem;
+                font-size: 0.85rem;
+            }
+
+        .collapse-btn {
+            display: none;
+        }
+
+        }
+
+        @@media (max-width: 576px) {
+            .admin-header
+
+        {
+            padding: 0 1rem;
+        }
+
+        .main-content {
+            padding: calc(var(--header-height) + 1rem) 1rem 1rem 1rem;
+        }
+
+        .user-dropdown .dropdown-toggle .user-name {
+            display: none;
+        }
+
+        .user-avatar {
+            margin-right: 0;
+        }
+
+        }</style>
+
+    @RenderSection("Style", required: false)
+</head>
+<body>
+    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+    {
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <div class="sidebar-brand">
+                <h1>
+                    <i class="fas fa-bolt me-2"></i>
+                    <span>Electro Admin</span>
+                </h1>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-heading">Core</div>
+
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index">
+                        <i class="fas fa-fw fa-tachometer-alt"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                </li>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-heading">Interface</div>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Product" asp-action="Index">
+                        <i class="fas fa-fw fa-box"></i>
+                        <span class="sidebar-text">Products</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="Index">
+                        <i class="fas fa-fw fa-tags"></i>
+                        <span class="sidebar-text">Categories</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Orders">
+                        <i class="fas fa-fw fa-shopping-cart"></i>
+                        <span class="sidebar-text">Orders</span>
+                        <span class="badge bg-danger rounded-pill ms-auto">New</span>
+                    </a>
+                </li>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-heading">Administration</div>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="User" asp-action="Index">
+                        <i class="fas fa-fw fa-users"></i>
+                        <span class="sidebar-text">Users</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-fw fa-cog"></i>
+                        <span class="sidebar-text">Settings</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="mt-auto p-3 text-center text-white-50">
+                <small>Electro Admin v1.0</small>
+            </div>
+
+            <!-- Collapse Button -->
+            <button class="collapse-btn" id="collapseBtn" type="button">
+                <i class="fas fa-chevron-left" id="collapseIcon"></i>
+            </button>
+        </div>
+
+        <!-- Header -->
+        <header class="admin-header">
+            <button class="hamburger-btn me-3" id="hamburger" type="button">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Replaced search bar with Electro Admin text -->
+            <div class="d-none d-md-flex me-auto">
+                <a href="#" class="brand-logo">
+                    <i class="fas fa-bolt"></i>
+                    <span>Electro Admin</span>
+                </a>
+            </div>
+
+            <div class="ms-auto d-flex align-items-center">
+                <!-- Notifications Dropdown -->
+                <div class="dropdown mx-3">
+                    <a class="position-relative" href="#" id="alertsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell fa-lg text-muted"></i>
+                        
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="alertsDropdown" style="width: 300px;">
+                        <h6 class="dropdown-header bg-primary text-white">
+                            Notifications Center
+                        </h6>
+                        <a class="dropdown-item d-flex align-items-center" href="#">
+                            <div class="me-3">
+                                <div class="icon-circle bg-primary text-white">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <span>new order Placed<span>
+                            </div>
+                        </a>
+                       
+                    </div>
+                </div>
+
+                <!-- User Dropdown -->
+                <div class="dropdown user-dropdown">
+                    <a class="dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        
+                        <div class="d-none d-md-block user-name">
+                            <span>@User.Identity.Name</span>
+                            <i class="fas fa-chevron-down ms-2 small"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                        <li>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt fa-sm me-2 text-muted"></i>
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+    }
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/modern-main.js"></script>
+
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const collapseBtn = document.getElementById('collapseBtn');
+        const collapseIcon = document.getElementById('collapseIcon');
+        const body = document.body;
+        const sidebar = document.getElementById('sidebar');
+
+        // Function to handle sidebar toggle
+        function toggleSidebar() {
+            body.classList.toggle('sidebar-open');
+
+            // Save sidebar state to localStorage
+            localStorage.setItem('sidebarOpen', body.classList.contains('sidebar-open'));
+        }
+
+        // Function to handle sidebar collapse
+        function toggleSidebarCollapse() {
+            body.classList.toggle('sidebar-collapsed');
+
+            // Update icon direction
+            if (body.classList.contains('sidebar-collapsed')) {
+                collapseIcon.classList.remove('fa-chevron-left');
+                collapseIcon.classList.add('fa-chevron-right');
+            } else {
+                collapseIcon.classList.remove('fa-chevron-right');
+                collapseIcon.classList.add('fa-chevron-left');
+            }
+
+            // Save sidebar collapse state to localStorage
+            localStorage.setItem('sidebarCollapsed', body.classList.contains('sidebar-collapsed'));
+        }
+
+        if (hamburger) {
+            hamburger.addEventListener('click', toggleSidebar);
+        }
+
+        if (collapseBtn) {
+            collapseBtn.addEventListener('click', toggleSidebarCollapse);
+        }
+
+        // Check localStorage for sidebar state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarOpen = localStorage.getItem('sidebarOpen') === 'true';
+            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+            if (sidebarOpen) {
+                body.classList.add('sidebar-open');
+            }
+
+            if (sidebarCollapsed) {
+                body.classList.add('sidebar-collapsed');
+                collapseIcon.classList.remove('fa-chevron-left');
+                collapseIcon.classList.add('fa-chevron-right');
+            }
+
+            // Set active nav item based on current URL
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && currentPath.includes(href) && href !== '/') {
+                    link.classList.add('active');
+                }
+            });
+
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Handle success messages from TempData
+            if (document.querySelector('.alert-success')) {
+                setTimeout(() => {
+                    const alert = document.querySelector('.alert-success');
+                    if (alert) {
+                        alert.classList.add('fade');
+                        setTimeout(() => alert.remove(), 500);
+                    }
+                }, 3000);
+            }
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth < 992 && body.classList.contains('sidebar-open')) {
+                if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
+                    body.classList.remove('sidebar-open');
+                    localStorage.setItem('sidebarOpen', 'false');
+                }
+            }
+        });
+
+
+
+
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth < 992 && body.classList.contains('sidebar-open')) {
+                body.classList.remove('sidebar-open');
+                localStorage.setItem('sidebarOpen', 'false');
+            } else if (window.innerWidth >= 992) {
+                const sidebarOpen = localStorage.getItem('sidebarOpen') === 'true';
+                if (sidebarOpen) {
+                    body.classList.add('sidebar-open');
+                }
+            }
+        });
+
+
+
+
+
+    </script>
+
+
+
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

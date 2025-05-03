@@ -1,0 +1,153 @@
+﻿@model Electro_ECommerce.Models.Product
+
+@{
+    ViewData["Title"] = "Delete Product";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-0 rounded-lg overflow-hidden">
+                <div class="card-header bg-danger text-white p-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div>
+                            <h2 class="mb-0 fw-bold">Delete Product</h2>
+                            <p class="mb-0">This action cannot be undone</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Warning:</strong> Deleting this product will remove it from all orders and customer carts.
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="position-relative rounded overflow-hidden shadow-sm" style="height: 200px;">
+                                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                                {
+                                    <img src="@Url.Content(Model.ImagePath)"
+                                         alt="@Model.Name"
+                                         class="w-100 h-100 object-fit-cover" />
+                                }
+                                else
+                                {
+                                    <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-box fa-3x text-muted"></i>
+                                    </div>
+                                }
+
+                                @if (Model.StockQuantity <= 0)
+                                {
+                                    <span class="badge bg-danger position-absolute top-0 start-0 m-2">Out of Stock</span>
+                                }
+                                else if (Model.StockQuantity < 10)
+                                {
+                                    <span class="badge bg-warning position-absolute top-0 start-0 m-2">Low Stock</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <h3 class="mb-4 fw-bold text-danger">@Model.Name</h3>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <h6 class="text-uppercase text-muted small fw-bold">Price</h6>
+                                        <p class="fw-bold fs-4 text-primary mb-0">$@Model.Price.ToString("0.00")</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <h6 class="text-uppercase text-muted small fw-bold">Stock Quantity</h6>
+                                        <p class="fw-bold fs-4 mb-0">@Model.StockQuantity</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+
+                            <div class="mb-3">
+                                <h6 class="text-uppercase text-muted small fw-bold">Description</h6>
+                                <p class="mb-0">
+                                    @if (!string.IsNullOrEmpty(Model.Description))
+                                    {
+                                        @Model.Description
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">No description available</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <form asp-action="Delete" class="d-flex justify-content-between">
+                        <input type="hidden" asp-for="ProductId" />
+                        <a asp-action="Index" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Delete Permanently
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .object-fit-cover {
+        object-fit: cover;
+    }
+
+    .btn-danger {
+        transition: all 0.3s;
+    }
+
+        .btn-danger:hover {
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+        }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate card entrance with shake effect
+            const card = document.querySelector('.card');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+
+                // Add shake animation after card appears
+                setTimeout(() => {
+                    card.style.animation = 'shake 0.5s ease-in-out';
+                }, 500);
+            }, 100);
+        });
+
+        // Define shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+        @@keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                20%, 60% { transform: translateX(-5px); }
+                40%, 80% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+}

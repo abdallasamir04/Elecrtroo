@@ -1,0 +1,446 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Dashboard</h2>
+            <p class="text-muted"> Electro control center</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/Orders" class="btn btn-outline-primary">
+                <i class="fas fa-shopping-cart me-2"></i>View Orders
+            </a>
+            <a href="/Product/Create" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add Product
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 stat-card bg-gradient-blue text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-white bg-opacity-25 text-white">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-details ms-3">
+                            <h3 class="mb-0 fw-bold">@(ViewBag.OrdersCount ?? 0)</h3>
+                            <p class="mb-0 opacity-75">Total Orders</p>
+                        </div>
+                    </div>
+                    <div class="progress mt-3 bg-white bg-opacity-25">
+                        <div class="progress-bar bg-white" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-transparent p-3 pt-0">
+                    <a href="/Admin/Orders" class="text-white d-flex align-items-center text-decoration-none">
+                        <small>View Details</small>
+                        <i class="fas fa-arrow-right ms-auto"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 stat-card bg-gradient-green text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-white bg-opacity-25 text-white">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-details ms-3">
+                            <h3 class="mb-0 fw-bold">$@(ViewBag.Revenue?.ToString("N0") ?? "0")</h3>
+                            <p class="mb-0 opacity-75">Total Revenue</p>
+                        </div>
+                    </div>
+                    <div class="progress mt-3 bg-white bg-opacity-25">
+                        <div class="progress-bar bg-white" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 stat-card bg-gradient-purple text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-white bg-opacity-25 text-white">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-details ms-3">
+                            <h3 class="mb-0 fw-bold">@(ViewBag.UsersCount ?? 0)</h3>
+                            <p class="mb-0 opacity-75">Total Users</p>
+                        </div>
+                    </div>
+                    <div class="progress mt-3 bg-white bg-opacity-25">
+                        <div class="progress-bar bg-white" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-transparent p-3 pt-0">
+                    <a href="/User" class="text-white d-flex align-items-center text-decoration-none">
+                        <small>Manage Users</small>
+                        <i class="fas fa-arrow-right ms-auto"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 stat-card bg-gradient-orange text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-white bg-opacity-25 text-white">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-details ms-3">
+                            <h3 class="mb-0 fw-bold">@(ViewBag.ProductsCount ?? 0)</h3>
+                            <p class="mb-0 opacity-75">Total Products</p>
+                        </div>
+                    </div>
+                    <div class="progress mt-3 bg-white bg-opacity-25">
+                        <div class="progress-bar bg-white" role="progressbar" style="width: 85%" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div class="card-footer border-0 bg-transparent p-3 pt-0">
+                    <a href="/Product" class="text-white d-flex align-items-center text-decoration-none">
+                        <small>Manage Products</small>
+                        <i class="fas fa-arrow-right ms-auto"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders & Top Products -->
+    <div class="row g-4 mt-2">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white p-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Recent Orders</h5>
+                        <a href="/Admin/Orders" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.RecentOrders != null && ViewBag.RecentOrders.Count > 0)
+                                {
+                                    foreach (var order in ViewBag.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                <span class="fw-medium">#@order.OrderId</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-circle bg-light text-primary me-2">
+                                                        @(order.User?.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                                    </div>
+                                                    <span>@(order.User?.UserName ?? "Unknown")</span>
+                                                </div>
+                                            </td>
+                                            <td>@(order.OrderDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
+                                            <td>
+                                                <span class="fw-medium">$@order.TotalAmount.ToString("F2")</span>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    string badgeClass = "bg-secondary";
+                                                    if (order.Status == "Completed") badgeClass = "bg-success";
+                                                    else if (order.Status == "Processing") badgeClass = "bg-primary";
+                                                    else if (order.Status == "Cancelled") badgeClass = "bg-danger";
+                                                    else if (order.Status == "Pending") badgeClass = "bg-warning";
+                                                }
+                                                <span class="badge @badgeClass">@(order.Status ?? "Pending")</span>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <a href="/Admin/OrderDetails/@order.OrderId" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">
+                                            <div class="empty-state-sm">
+                                                <i class="fas fa-shopping-cart fa-2x text-muted mb-2"></i>
+                                                <p class="mb-0">No recent orders</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Selling Products -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white p-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Top Selling Products</h5>
+                        <a href="/Product" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if (ViewBag.TopProducts != null && ViewBag.TopProducts.Count > 0)
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var product in ViewBag.TopProducts)
+                            {
+                                <li class="list-group-item border-0 py-3 px-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0 me-3">
+                                            @if (!string.IsNullOrEmpty(product.ImagePath))
+                                            {
+                                                <img src="@product.ImagePath" alt="@product.Name"
+                                                     class="rounded" width="50" height="50" style="object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                                     style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-box text-muted"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1 min-width-0">
+                                            <h6 class="mb-0 text-truncate">@product.Name</h6>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">@(product.Category?.Name ?? "Uncategorized")</small>
+                                                <span class="text-primary fw-bold">$@product.Price.ToString("F2")</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="empty-state-sm">
+                                <i class="fas fa-box fa-2x text-muted mb-2"></i>
+                                <p class="mb-0">No product data available</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Chart -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white p-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Sales Overview</h5>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary active">Monthly</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Quarterly</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Yearly</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <canvas id="salesChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Gradient backgrounds for stat cards */
+    .bg-gradient-blue {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+
+    .bg-gradient-green {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+    }
+
+    .bg-gradient-purple {
+        background: linear-gradient(135deg, #6f42c1 0%, #4e2b89 100%);
+    }
+
+    .bg-gradient-orange {
+        background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+    }
+
+    .stat-card {
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .avatar-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .min-width-0 {
+        min-width: 0;
+    }
+
+    .empty-state-sm {
+        padding: 1rem;
+        display: inline-block;
+    }
+
+    /* Animation for stat cards */
+    .stat-card {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+    @@keyframes fadeInUp {
+        to
+
+    {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sample data - replace with actual data from your backend
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const salesData = [5000, 7500, 6500, 8000, 9500, 11000, 10500, 12000, 12500, 13000, 14000, 15000];
+            const ordersData = [50, 65, 60, 75, 85, 95, 90, 105, 110, 115, 120, 130];
+
+            // Sales Chart
+            const ctx = document.getElementById('salesChart');
+            if (ctx) {
+                new Chart(ctx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Sales ($)',
+                                data: salesData,
+                                borderColor: '#4e73df',
+                                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            },
+                            {
+                                label: 'Orders',
+                                data: ordersData,
+                                borderColor: '#1cc88a',
+                                backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    drawBorder: false
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Animate cards
+            const cards = document.querySelectorAll('.card:not(.stat-card)');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 500 + (index * 100));
+            });
+        });
+    </script>
+}
