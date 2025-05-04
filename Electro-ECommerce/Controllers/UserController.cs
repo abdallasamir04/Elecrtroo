@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Electro_ECommerce.Controllers
 {
@@ -35,6 +36,33 @@ namespace Electro_ECommerce.Controllers
             if (user == null)
                 return NotFound();
 
+            // Set default values for statistics
+            ViewBag.OrderCount = 0;
+            ViewBag.TotalSpent = 0;
+
+            // Try to get order statistics if available
+            try
+            {
+                // Check if Orders table exists and has appropriate properties
+                if (_context.Orders != null)
+                {
+                    // Count orders for this user
+                    ViewBag.OrderCount = await _context.Orders
+                        .CountAsync(o => o.UserId == id);
+
+                    // Calculate total spent - adjust property names to match your Order model
+                    // For example, if your Order model has TotalPrice instead of Total
+                    ViewBag.TotalSpent = await _context.Orders
+                        .Where(o => o.UserId == id && o.Status == "Completed")
+                        .SumAsync(o => o.TotalAmount); // Change this to match your actual property name
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't crash
+                Console.WriteLine($"Error fetching user statistics: {ex.Message}");
+            }
+
             return View(user);
         }
 
@@ -64,6 +92,7 @@ namespace Electro_ECommerce.Controllers
 
             if (result.Succeeded)
             {
+                TempData["SuccessMessage"] = "User created successfully";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -75,9 +104,8 @@ namespace Electro_ECommerce.Controllers
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, string userName, string email, string role)
+        // GET: User/Edit/5
+        public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return NotFound();
@@ -87,25 +115,101 @@ namespace Electro_ECommerce.Controllers
             if (user == null)
                 return NotFound();
 
-            user.UserName = userName;
-            user.Email = email;
-            user.Role = role;
-            user.UpdatedAt = DateTime.Now;
+            return View(user);
+        }
 
-            var result = await _userManager.UpdateAsync(user);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(string id, User model)
+        {
+            if (id != model.Id)
+                return NotFound();
 
-            if (result.Succeeded)
+            if (ModelState.IsValid)
             {
+                try
+                {
+                    var user = await _userManager.FindByIdAsync(id);
+                    if (user == null)
+                        return NotFound();
+
+                    user.UserName = model.UserName;
+                    user.Email = model.Email;
+                    user.PhoneNumber = model.PhoneNumber;
+                    user.Role = model.Role;
+                    user.ShippingAddress = model.ShippingAddress;
+                    user.EmailConfirmed = model.EmailConfirmed;
+                    user.TwoFactorEnabled = model.TwoFactorEnabled;
+                    user.UpdatedAt = DateTime.Now;
+
+                    var result = await _userManager.UpdateAsync(user);
+
+                    if (result.Succeeded)
+                    {
+                        TempData["SuccessMessage"] = "User updated successfully";
+                        return RedirectToAction(nameof(Details), new { id = user.Id });
+                    }
+
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, $"An error occurred: {ex.Message}");
+                }
+            }
+
+            return View(model);
+        }
+
+        // POST: User/ToggleStatus/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleStatus(string id, bool activate)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["ErrorMessage"] = "User ID not provided";
                 return RedirectToAction(nameof(Index));
             }
 
-            foreach (var error in result.Errors)
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                TempData["ErrorMessage"] = "User not found";
+                return RedirectToAction(nameof(Index));
             }
 
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                // Update the EmailConfirmed property based on the activate parameter
+                user.EmailConfirmed = activate;
+                user.UpdatedAt = DateTime.Now;
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    TempData["SuccessMessage"] = activate
+                        ? $"User {user.UserName} has been activated"
+                        : $"User {user.UserName} has been suspended";
+                }
+                else
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    TempData["ErrorMessage"] = $"Failed to update user status: {errors}";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"An error occurred: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Details), new { id = user.Id });
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
@@ -134,6 +238,12 @@ namespace Electro_ECommerce.Controllers
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             TempData["ErrorMessage"] = $"Failed to delete user: {errors}";
             return RedirectToAction(nameof(Index));
+        }
+
+        // For AJAX responses
+        private IActionResult JsonResponse(bool success, string message)
+        {
+            return Json(new { success, message });
         }
     }
 }

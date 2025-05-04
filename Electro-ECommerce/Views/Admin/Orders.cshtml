@@ -1,40 +1,115 @@
 ﻿@model IEnumerable<Electro_ECommerce.Models.Order>
+@{
+    ViewData["Title"] = "Order Management";
+    Layout = "_AdminLayout";
+}
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Customer</th>
-            <th>Date</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var order in Model)
-        {
-            <tr>
-                <td>#@order.OrderId</td>
-                <td>@(order.User?.UserName ?? "Unknown")</td>
-                <td>
-                    @(order.OrderDate.HasValue
-                        ? order.OrderDate.Value.ToString("dd MMM yyyy")
-                        : "N/A")
-                </td>
-                <td>@order.TotalAmount.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
-                <td>
-                    <span class="badge @GetStatusBadgeClass(order.Status)">
-                        @order.Status
-                    </span>
-                </td>
-                <td>
-                    <a class="btn btn-sm btn-primary" asp-action="OrderDetails" asp-route-id="@order.OrderId">Details</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Order Management</h2>
+            <p class="text-muted">View and manage customer orders</p>
+        </div>
+        
+    </div>
+
+    
+    <!-- Orders Table -->
+    <div class="card shadow-sm border-0 rounded-lg">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var order in Model)
+                            {
+                                <tr class="order-row">
+                                    <td class="ps-4 fw-medium">#@order.OrderId</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle bg-primary text-white me-3">
+                                                @(order.User?.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">@(order.User?.UserName ?? "Unknown")</h6>
+                                                @if (order.User?.Email != null)
+                                                {
+                                                    <small class="text-muted">@order.User.Email</small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (order.OrderDate.HasValue)
+                                        {
+                                            <div class="d-flex flex-column">
+                                                <span>@order.OrderDate.Value.ToString("dd MMM yyyy")</span>
+                                                <small class="text-muted">@order.OrderDate.Value.ToString("HH:mm")</small>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span>N/A</span>
+                                        }
+                                    </td>
+                                    <td class="fw-medium">@order.TotalAmount.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
+                                    <td>
+                                        <span class="badge @GetStatusBadgeClass(order.Status)">
+                                            @order.Status
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <a class="btn btn-sm btn-outline-primary" asp-action="OrderDetails" asp-route-id="@order.OrderId">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="empty-state">
+                                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                        <h5>No orders found</h5>
+                                        <p class="text-muted">There are no orders to display</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- No Results Message -->
+            <div id="noResults" class="text-center py-5 d-none">
+                <div class="empty-state">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h5>No orders found</h5>
+                    <p class="text-muted">Try adjusting your search or filter criteria</p>
+                    <button id="clearFilters" class="btn btn-outline-primary mt-2">
+                        <i class="fas fa-redo-alt me-2"></i>Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>    
+    </div>
+</div>
 
 @functions {
     private string GetStatusBadgeClass(string status)
@@ -91,4 +166,125 @@
         padding: 0.35em 0.65em;
         font-weight: 500;
     }
+
+    /* Avatar circle */
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    /* Empty state */
+    .empty-state {
+        padding: 2rem;
+        display: inline-block;
+    }
+
+    /* Animation for table rows */
+    .order-row {
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    @@keyframes fadeInUp {
+        to
+
+    {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* Hover effect for table rows */
+    .order-row:hover {
+        background-color: rgba(78, 115, 223, 0.05);
+    }
 </style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Staggered animation for table rows
+            const orderRows = document.querySelectorAll('.order-row');
+            orderRows.forEach((row, index) => {
+                row.style.animationDelay = `${index * 0.05}s`;
+            });
+
+            // Search and filter functionality
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const dateFilter = document.getElementById('dateFilter');
+            const resetFilters = document.getElementById('resetFilters');
+            const clearFilters = document.getElementById('clearFilters');
+            const ordersTableBody = document.getElementById('ordersTableBody');
+            const noResults = document.getElementById('noResults');
+            const orderRows = document.querySelectorAll('.order-row');
+            const visibleCount = document.getElementById('visibleCount');
+
+            function filterOrders() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const statusValue = statusFilter.value.toLowerCase();
+                const dateValue = dateFilter.value.toLowerCase();
+                let visibleCount = 0;
+
+                orderRows.forEach(row => {
+                    const orderId = row.querySelector('td:first-child').textContent.toLowerCase();
+                    const customer = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const status = row.querySelector('.badge').textContent.toLowerCase();
+
+                    // Simple search filter
+                    const matchesSearch = orderId.includes(searchTerm) ||
+                                         customer.includes(searchTerm);
+
+                    // Status filter
+                    const matchesStatus = statusValue === '' || status.includes(statusValue);
+
+                    // Date filter (simplified - in a real app you'd use actual date comparison)
+                    const matchesDate = dateValue === ''; // For demo, we're not implementing date filtering
+
+                    if (matchesSearch && matchesStatus && matchesDate) {
+                        row.classList.remove('d-none');
+                        visibleCount++;
+                    } else {
+                        row.classList.add('d-none');
+                    }
+                });
+
+                // Update visible count if element exists
+                if (visibleCount) {
+                    document.getElementById('visibleCount').textContent = visibleCount;
+                }
+
+                // Show/hide no results message
+                if (visibleCount === 0 && orderRows.length > 0) {
+                    if (noResults) noResults.classList.remove('d-none');
+                    if (ordersTableBody) ordersTableBody.classList.add('d-none');
+                } else {
+                    if (noResults) noResults.classList.add('d-none');
+                    if (ordersTableBody) ordersTableBody.classList.remove('d-none');
+                }
+            }
+
+            // Reset filters
+            function resetAllFilters() {
+                if (searchInput) searchInput.value = '';
+                if (statusFilter) statusFilter.value = '';
+                if (dateFilter) dateFilter.value = '';
+                filterOrders();
+            }
+
+            // Event listeners
+            if (searchInput) searchInput.addEventListener('input', filterOrders);
+            if (statusFilter) statusFilter.addEventListener('change', filterOrders);
+            if (dateFilter) dateFilter.addEventListener('change', filterOrders);
+            if (resetFilters) resetFilters.addEventListener('click', resetAllFilters);
+            if (clearFilters) clearFilters.addEventListener('click', resetAllFilters);
+        });
+    </script>
+}

@@ -258,6 +258,11 @@
                 margin-right: 0.5rem;
             }
 
+            .brand-logo:hover {
+                color: var(--primary-color);
+                opacity: 0.9;
+            }
+
         .user-dropdown .dropdown-toggle::after {
             display: none;
         }
@@ -441,14 +446,7 @@
                     <a class="nav-link" asp-area="" asp-controller="User" asp-action="Index">
                         <i class="fas fa-fw fa-users"></i>
                         <span class="sidebar-text">Users</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <i class="fas fa-fw fa-cog"></i>
-                        <span class="sidebar-text">Settings</span>
-                    </a>
-                </li>
+                    </a> 
             </ul>
 
             <div class="mt-auto p-3 text-center text-white-50">
@@ -467,9 +465,9 @@
                 <i class="fas fa-bars"></i>
             </button>
 
-            <!-- Replaced search bar with Electro Admin text -->
+            <!-- Electro Admin text with link to Admin dashboard -->
             <div class="d-none d-md-flex me-auto">
-                <a href="#" class="brand-logo">
+                <a asp-controller="Admin" asp-action="Index" class="brand-logo">
                     <i class="fas fa-bolt"></i>
                     <span>Electro Admin</span>
                 </a>
@@ -480,7 +478,6 @@
                 <div class="dropdown mx-3">
                     <a class="position-relative" href="#" id="alertsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-bell fa-lg text-muted"></i>
-                        
                     </a>
                     <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="alertsDropdown" style="width: 300px;">
                         <h6 class="dropdown-header bg-primary text-white">
@@ -493,17 +490,15 @@
                                 </div>
                             </div>
                             <div>
-                                <span>new order Placed<span>
+                                <span>New order placed</span>
                             </div>
                         </a>
-                       
                     </div>
                 </div>
 
                 <!-- User Dropdown -->
                 <div class="dropdown user-dropdown">
                     <a class="dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        
                         <div class="d-none d-md-block user-name">
                             <span>@User.Identity.Name</span>
                             <i class="fas fa-chevron-down ms-2 small"></i>
@@ -580,12 +575,9 @@
 
         // Check localStorage for sidebar state on page load
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebarOpen = localStorage.getItem('sidebarOpen') === 'true';
+            // MODIFIED: Don't automatically open the sidebar on page load
+            // Only apply the collapsed state if it was previously set
             const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
-            if (sidebarOpen) {
-                body.classList.add('sidebar-open');
-            }
 
             if (sidebarCollapsed) {
                 body.classList.add('sidebar-collapsed');
@@ -632,31 +624,21 @@
             }
         });
 
-
-
-
-
         // Handle window resize
         window.addEventListener('resize', function() {
             if (window.innerWidth < 992 && body.classList.contains('sidebar-open')) {
                 body.classList.remove('sidebar-open');
                 localStorage.setItem('sidebarOpen', 'false');
             } else if (window.innerWidth >= 992) {
-                const sidebarOpen = localStorage.getItem('sidebarOpen') === 'true';
-                if (sidebarOpen) {
-                    body.classList.add('sidebar-open');
-                }
+                // MODIFIED: Don't automatically open the sidebar on resize
+                // This line has been removed to prevent auto-opening
+                // const sidebarOpen = localStorage.getItem('sidebarOpen') === 'true';
+                // if (sidebarOpen) {
+                //     body.classList.add('sidebar-open');
+                // }
             }
         });
-
-
-
-
-
     </script>
-
-
-
 
     @RenderSection("Scripts", required: false)
 </body>

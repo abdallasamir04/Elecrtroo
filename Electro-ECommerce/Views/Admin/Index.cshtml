@@ -63,7 +63,7 @@
                         <div class="progress-bar bg-white" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
-                
+               
             </div>
         </div>
 
@@ -138,7 +138,7 @@
                                     <th>Date</th>
                                     <th>Amount</th>
                                     <th>Status</th>
-                                    <th class="text-end pe-4">Actions</th>
+                                    <th class="text-end pe-4">Details</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -262,10 +262,10 @@
                 <div class="card-header bg-white p-4 border-bottom">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold">Sales Overview</h5>
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-outline-secondary active">Monthly</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Quarterly</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Yearly</button>
+                        <div class="btn-group" id="timeRangeFilter">
+                            <button type="button" class="btn btn-sm btn-outline-secondary active" data-period="monthly">Monthly</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="quarterly">Quarterly</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="yearly">Yearly</button>
                         </div>
                     </div>
                 </div>
@@ -370,62 +370,119 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Sample data - replace with actual data from your backend
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const salesData = [5000, 7500, 6500, 8000, 9500, 11000, 10500, 12000, 12500, 13000, 14000, 15000];
-            const ordersData = [50, 65, 60, 75, 85, 95, 90, 105, 110, 115, 120, 130];
+            // Chart data for different time periods
+            const chartData = {
+                monthly: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    salesData: [5000, 7500, 6500, 8000, 9500, 11000, 10500, 12000, 12500, 13000, 14000, 15000],
+                    ordersData: [50, 65, 60, 75, 85, 95, 90, 105, 110, 115, 120, 130]
+                },
+                quarterly: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    salesData: [19000, 28500, 35000, 42000],
+                    ordersData: [175, 255, 305, 365]
+                },
+                yearly: {
+                    labels: ['2019', '2020', '2021', '2022', '2023'],
+                    salesData: [85000, 95000, 120000, 135000, 150000],
+                    ordersData: [750, 850, 1050, 1200, 1300]
+                }
+            };
 
-            // Sales Chart
-            const ctx = document.getElementById('salesChart');
-            if (ctx) {
-                new Chart(ctx.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: months,
-                        datasets: [
-                            {
-                                label: 'Sales ($)',
-                                data: salesData,
-                                borderColor: '#4e73df',
-                                backgroundColor: 'rgba(78, 115, 223, 0.1)',
-                                tension: 0.3,
-                                fill: true
-                            },
-                            {
-                                label: 'Orders',
-                                data: ordersData,
-                                borderColor: '#1cc88a',
-                                backgroundColor: 'rgba(28, 200, 138, 0.1)',
-                                tension: 0.3,
-                                fill: true
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top'
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false
-                            }
+            // Initialize chart with monthly data
+            let currentPeriod = 'monthly';
+            let salesChart;
+
+            function initChart() {
+                const ctx = document.getElementById('salesChart');
+                if (ctx) {
+                    // Destroy existing chart if it exists
+                    if (salesChart) {
+                        salesChart.destroy();
+                    }
+
+                    // Get data for current period
+                    const data = chartData[currentPeriod];
+
+                    // Create new chart
+                    salesChart = new Chart(ctx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [
+                                {
+                                    label: 'Sales ($)',
+                                    data: data.salesData,
+                                    borderColor: '#4e73df',
+                                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                                    tension: 0.3,
+                                    fill: true
+                                },
+                                {
+                                    label: 'Orders',
+                                    data: data.ordersData,
+                                    borderColor: '#1cc88a',
+                                    backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                                    tension: 0.3,
+                                    fill: true
+                                }
+                            ]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    drawBorder: false
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false
                                 }
                             },
-                            x: {
-                                grid: {
-                                    display: false
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        drawBorder: false
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
                                 }
+                            },
+                            animation: {
+                                duration: 1000,
+                                easing: 'easeOutQuart'
                             }
                         }
-                    }
+                    });
+                }
+            }
+
+            // Initialize chart
+            initChart();
+
+            // Handle time range filter buttons
+            const timeRangeFilter = document.getElementById('timeRangeFilter');
+            if (timeRangeFilter) {
+                const buttons = timeRangeFilter.querySelectorAll('button');
+
+                buttons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        // Remove active class from all buttons
+                        buttons.forEach(btn => btn.classList.remove('active'));
+
+                        // Add active class to clicked button
+                        this.classList.add('active');
+
+                        // Update current period
+                        currentPeriod = this.getAttribute('data-period');
+
+                        // Update chart
+                        initChart();
+                    });
                 });
             }
 
