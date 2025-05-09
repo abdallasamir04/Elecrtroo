@@ -1,5 +1,6 @@
 ﻿using Electro_ECommerce.Data;
 using Electro_ECommerce.Models;
+using Electro_ECommerce.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,10 +21,49 @@ namespace Electro_ECommerce.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var users = await _userManager.Users.ToListAsync();
-            return View(users);
+            // Set page size
+            int pageSize = 5;
+
+            // Get all users for statistics
+            var allUsers = await _userManager.Users.ToListAsync();
+
+            // Calculate statistics
+            int totalUsers = allUsers.Count;
+            int totalAdmins = allUsers.Count(u => u.Role == "Admin");
+            int totalCustomers = allUsers.Count(u => u.Role != "Admin");
+            int totalPending = allUsers.Count(u => !u.EmailConfirmed);
+            int totalActive = allUsers.Count(u => u.EmailConfirmed);
+
+            // Calculate total pages
+            int totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
+
+            // Ensure page is within valid range
+            page = Math.Max(1, Math.Min(page, Math.Max(1, totalPages)));
+
+            // Get paginated users
+            var users = await _userManager.Users
+                .OrderByDescending(u => u.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Create view model
+            var viewModel = new UserListViewModel
+            {
+                Users = users,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                TotalUsers = totalUsers,
+                TotalAdmins = totalAdmins,
+                TotalCustomers = totalCustomers,
+                TotalPending = totalPending,
+                TotalActive = totalActive
+            };
+
+            return View(viewModel);
         }
 
         public async Task<IActionResult> Details(string id)

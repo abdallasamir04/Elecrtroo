@@ -2350,3 +2350,52 @@ textarea.input {
     }
 
 }
+
+/* Navbar responsive styles */
+@media (max-width: 991.98px) {
+    .navbar .navbar-collapse {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .navbar .dropdown-menu {
+        border: none;
+        padding-left: 1.5rem;
+        background-color: transparent;
+    }
+
+    .navbar .input-group {
+        width: 100%;
+    }
+}
+
+/* Improve dropdown behavior on hover for desktop */
+@media (min-width: 992px) {
+    .navbar .dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+    }
+}
+
+/* Smooth transitions for navbar elements */
+.navbar-collapse {
+    transition: all 0.3s ease;
+}
+
+.navbar .nav-link {
+    transition: color 0.2s ease;
+}
+
+    .navbar .nav-link:hover {
+        color: #0d6efd;
+    }
+
+/* Cart button hover effect */
+.cart-button {
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+    .cart-button:hover {
+        transform: scale(1.05);
+        background-color: #e9ecef !important;
+    }

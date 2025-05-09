@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Electro_ECommerce.Models.Order>
+﻿@model Electro_ECommerce.Models.ViewModels.AdminOrderListViewModel
 @{
     ViewData["Title"] = "Order Management";
     Layout = "_AdminLayout";
@@ -11,10 +11,69 @@
             <h2 class="fw-bold mb-0">Order Management</h2>
             <p class="text-muted">View and manage customer orders</p>
         </div>
-        
+    </div>
+
+    <!-- Order Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-1">Total Orders</h6>
+                    <h3 class="mb-0 fw-bold">@Model.TotalOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-1">Pending</h6>
+                    <h3 class="mb-0 fw-bold text-info">@Model.PendingOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-1">Processing</h6>
+                    <h3 class="mb-0 fw-bold text-primary">@Model.ProcessingOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-1">Shipped</h6>
+                    <h3 class="mb-0 fw-bold text-indigo">@Model.ShippedOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-1">Completed</h6>
+                    <h3 class="mb-0 fw-bold text-success">@Model.CompletedOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-1">Cancelled</h6>
+                    <h3 class="mb-0 fw-bold text-danger">@Model.CancelledOrders</h3>
+                </div>
+            </div>
+        </div>
     </div>
 
     
+
+    <!-- Pagination Info -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="mb-0 text-muted">
+            Showing @((Model.CurrentPage - 1) * Model.PageSize + 1) to @(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalOrders)) of @Model.TotalOrders orders
+        </p>
+    </div>
+
     <!-- Orders Table -->
     <div class="card shadow-sm border-0 rounded-lg">
         <div class="card-body p-0">
@@ -31,9 +90,9 @@
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
-                        @if (Model != null && Model.Any())
+                        @if (Model.Orders != null && Model.Orders.Any())
                         {
-                            foreach (var order in Model)
+                            foreach (var order in Model.Orders)
                             {
                                 <tr class="order-row">
                                     <td class="ps-4 fw-medium">#@order.OrderId</td>
@@ -107,8 +166,74 @@
                     </button>
                 </div>
             </div>
-        </div>    
+        </div>
     </div>
+
+    <!-- Pagination Controls -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <!-- Previous page -->
+                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                    <a class="page-link" asp-action="Orders" asp-route-page="@(Model.CurrentPage - 1)" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <!-- Page numbers -->
+                @{
+                    int startPage = Math.Max(1, Model.CurrentPage - 2);
+                    int endPage = Math.Min(Model.TotalPages, startPage + 4);
+
+                    if (endPage - startPage < 4 && startPage > 1)
+                    {
+                        startPage = Math.Max(1, endPage - 4);
+                    }
+                }
+
+                @if (startPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Orders" asp-route-page="1">1</a>
+                    </li>
+                    @if (startPage > 2)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    }
+                }
+
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Orders" asp-route-page="@i">@i</a>
+                    </li>
+                }
+
+                @if (endPage < Model.TotalPages)
+                {
+                    @if (endPage < Model.TotalPages - 1)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    }
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Orders" asp-route-page="@Model.TotalPages">@Model.TotalPages</a>
+                    </li>
+                }
+
+                <!-- Next page -->
+                <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                    <a class="page-link" asp-action="Orders" asp-route-page="@(Model.CurrentPage + 1)" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>
 
 @functions {
@@ -205,6 +330,28 @@
     .order-row:hover {
         background-color: rgba(78, 115, 223, 0.05);
     }
+
+    /* Pagination styling */
+    .pagination {
+        margin-top: 1.5rem;
+    }
+
+    .page-item.active .page-link {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+
+    .page-link {
+        color: #4e73df;
+    }
+
+        .page-link:hover {
+            color: #2e59d9;
+        }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+    }
 </style>
 
 @section Scripts {
@@ -225,7 +372,6 @@
             const ordersTableBody = document.getElementById('ordersTableBody');
             const noResults = document.getElementById('noResults');
             const orderRows = document.querySelectorAll('.order-row');
-            const visibleCount = document.getElementById('visibleCount');
 
             function filterOrders() {
                 const searchTerm = searchInput.value.toLowerCase();
@@ -255,11 +401,6 @@
                         row.classList.add('d-none');
                     }
                 });
-
-                // Update visible count if element exists
-                if (visibleCount) {
-                    document.getElementById('visibleCount').textContent = visibleCount;
-                }
 
                 // Show/hide no results message
                 if (visibleCount === 0 && orderRows.length > 0) {

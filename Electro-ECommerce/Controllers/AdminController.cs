@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Electro_ECommerce.Models;
 using Electro_ECommerce.ViewModels;
 using Electro_ECommerce.Data;
+using Electro_ECommerce.Models.ViewModels;
 
 namespace Electro_ECommerce.Controllers
 {
@@ -346,14 +347,54 @@ namespace Electro_ECommerce.Controllers
         #region Order Management
         // GET: Admin/Orders
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Orders()
+        public async Task<IActionResult> Orders(int page = 1)
         {
+            // Set page size
+            int pageSize = 10;
+
+            // Get all orders for statistics
+            var allOrders = await _context.Orders.ToListAsync();
+
+            // Calculate statistics
+            int totalOrders = allOrders.Count;
+            int pendingOrders = allOrders.Count(o => o.Status == "Pending");
+            int processingOrders = allOrders.Count(o => o.Status == "Processing");
+            int shippedOrders = allOrders.Count(o => o.Status == "Shipped");
+            int completedOrders = allOrders.Count(o => o.Status == "Completed");
+            int cancelledOrders = allOrders.Count(o => o.Status == "Cancelled");
+            decimal totalRevenue = allOrders.Where(o => o.Status == "Completed").Sum(o => o.TotalAmount);
+
+            // Calculate total pages
+            int totalPages = (int)Math.Ceiling(totalOrders / (double)pageSize);
+
+            // Ensure page is within valid range
+            page = Math.Max(1, Math.Min(page, Math.Max(1, totalPages)));
+
+            // Get paginated orders
             var orders = await _context.Orders
                 .Include(o => o.User)
                 .OrderByDescending(o => o.OrderDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return View(orders);
+            // Create view model
+            var viewModel = new AdminOrderListViewModel
+            {
+                Orders = orders,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                TotalOrders = totalOrders,
+                PendingOrders = pendingOrders,
+                ProcessingOrders = processingOrders,
+                ShippedOrders = shippedOrders,
+                CompletedOrders = completedOrders,
+                CancelledOrders = cancelledOrders,
+                TotalRevenue = totalRevenue
+            };
+
+            return View(viewModel);
         }
 
         // GET: Admin/OrderDetails/5
